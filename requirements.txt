@@ -1,2 +1,3 @@
 pandas
-pymongo[srv]
+Flask
+flask-pymongo
