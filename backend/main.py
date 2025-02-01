@@ -1,9 +1,11 @@
+import os
+
 from flask import Flask
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 
 # Correct URI with TLS
-uri = "mongodb+srv://sibi-tiruchi:B0N0DNce3GnIBF5v@cluster0.qoz8v.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+uri = os.getenv("MONGO_URI")
 # Create client with TLS settings
 client = MongoClient(uri, tls=True, server_api=ServerApi('1'))
 
