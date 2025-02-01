@@ -41,7 +41,7 @@ def create_itinerary(user_: user):
     # Select 
     options = "MONGO DB QUERY"  # sort by rating
     activity_options = "MONGO DB QUERY" # sort by rating, include difficulty --> decrease the rating 
-    food_options = "MONGO DB QUERY" # sort by rating, include cost
+    food_options = "MONGO DB QUERY" # potentially set up YELP API???
 
     for activity in activity_options:
         itinerary_.add_object()
