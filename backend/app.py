@@ -35,5 +35,3 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 app.run(debug=True, port=5001)
-
-print("bitch")
