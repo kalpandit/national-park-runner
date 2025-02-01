@@ -23,3 +23,12 @@ h1, h2, h3, h4 {
 p, span, button, a {
   font-family: 'DM Sans', serif;
 }
+
+@keyframes scrollPath {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}

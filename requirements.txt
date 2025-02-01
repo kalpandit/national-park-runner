@@ -1,2 +1,4 @@
 pandas
-pymongo[srv]
+Flask
+pymongo
+requests
