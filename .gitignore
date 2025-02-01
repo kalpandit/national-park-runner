@@ -1,0 +1,8 @@
+.DS_Store
+national-park-ui/node_modules/
+
+# React Router
+national-park-ui/.react-router/
+national-park-ui/build/
+national-park-ui/package-lock.json/
+
