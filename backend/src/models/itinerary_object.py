@@ -5,7 +5,7 @@ class itinerary_object:
 
 
         self.start_time = start_time
-        self.end_time = self.tags.get("length", 12)
+        self.end_time = self.tags.get("length", 12)+start_time
         self.activity = activity
         self.tags = tags
 
