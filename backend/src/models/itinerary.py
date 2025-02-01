@@ -1,6 +1,40 @@
+from itinerary_object import itinerary_object
+from user import user
+
 
 class itinerary:
 
     def __init__(self):
 
-        pass
+        # A list of itinerary_objects
+        self.itinerary_objects = []
+        self.alternative_options = []
+    
+    def add_object(self, itinerary_object_: itinerary_object):
+        new_itinerary = []
+        inserted = False
+
+        for obj in self.itinerary_objects:
+            if obj.end_time <= itinerary_object_.start_time or obj.start_time >= itinerary_object_.end_time:
+                new_itinerary.append(obj)
+            else:
+                if not inserted:
+                    new_itinerary.append(itinerary_object_)
+                    inserted = True
+
+        if not inserted:
+            new_itinerary.append(itinerary_object_)
+
+        self.itinerary_objects = new_itinerary
+
+def create_itinerary(user_: user):
+
+    itin = itinerary()
+    cost = user_.tags.get("cost", None)
+    difficulty = user_.tags.get("difficulty", "Hard")
+
+    # Select 
+    options = "MONGO DB QUERY"  # sort by rating
+
+
+
