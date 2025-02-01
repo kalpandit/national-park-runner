@@ -3,7 +3,10 @@ class user:
     def __init__(self, username, password, allergies, accessability, cost, difficulty = {}):
         self.username = username
         self.password = password
-        self.tags = tags
+        self.allergies=allergies
+        self.accessability=accessability
+        self.cost=cost
+        self.difficulty=difficulty
     
     def modify_user_information(self, typeChange, newValue):
         if typeChange == "allergies":
