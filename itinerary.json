@@ -1,0 +1,94 @@
+{
+    "days": [
+      {
+        "activities": [
+          {
+            "accessible": true,
+            "difficulty": "Easy",
+            "education": "Encounter diverse wildlife, including alligators, birds, and turtles, while learning about the park's ecosystem.",
+            "name": "Anhinga Trail Tram Tour",
+            "rating": 4,
+            "time": 2,
+            "type": "Wildlife Safari"
+          },
+          {
+            "accessible": false,
+            "difficulty": "Moderate",
+            "education": "Explore the hardwood forest, discovering native plants and their role in the Everglades environment.",
+            "name": "Gumbo Limbo Trail",
+            "rating": 3,
+            "time": 1.5,
+            "type": "Hiking"
+          }
+        ]
+      },
+      {
+        "activities": [
+          {
+            "accessible": true,
+            "difficulty": "Easy",
+            "education": "Paddle through serene waterways, observing the abundant birdlife and learning about the importance of freshwater habitats.",
+            "name": "Nine Mile Pond",
+            "rating": 4,
+            "time": 3,
+            "type": "Kayaking"
+          },
+          {
+            "accessible": false,
+            "difficulty": "Moderate",
+            "education": "Experience the thrill of an airboat ride through the Everglades, exploring its hidden corners and encountering wildlife up close.",
+            "name": "Everglades City Airboat Tours",
+            "rating": 4,
+            "time": 1,
+            "type": "Airboat"
+          }
+        ]
+      },
+      {
+        "activities": [
+          {
+            "accessible": true,
+            "difficulty": "Easy",
+            "education": "Ascend the tower for panoramic views of the Everglades, capturing stunning photographs of the vast landscapes and wildlife.",
+            "name": "Shark Valley Observation Tower",
+            "rating": 5,
+            "time": 0.5,
+            "type": "Photography"
+          },
+          {
+            "accessible": true,
+            "difficulty": "Easy",
+            "education": "Dive into the fascinating history and ecology of the Everglades through interactive exhibits and informative displays.",
+            "name": "Everglades Visitor Center",
+            "rating": 3,
+            "time": 1,
+            "type": "Educational"
+          }
+        ]
+      }
+    ],
+    "description": "Embark on an unforgettable family adventure in the unique and captivating Everglades National Park.",
+    "foodRecommendations": [
+      {
+        "description": "Authentic Seminole cuisine, including alligator tail and fry bread.",
+        "location": "Within the Miccosukee Indian Village",
+        "name": "Miccosukee Grill"
+      },
+      {
+        "description": "Fresh seafood and local dishes with stunning waterfront views.",
+        "location": "Everglades City",
+        "name": "Everglades City Restaurant"
+      },
+      {
+        "description": "Casual dining offering a variety of dishes, including alligator nuggets and frog legs.",
+        "location": "Shark Valley Visitor Center",
+        "name": "Everglades Gator Grill"
+      }
+    ],
+    "image": {
+      "image_url": "https://images.unsplash.com/photo-1467358895199-cd5d1847a7e4?ixid=M3w3MDQxMDl8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Mzg0NDQyODF8&ixlib=rb-4.0.3",
+      "query": "Everglades Adventure"
+    },
+    "name": "Everglades Adventure"
+  }
+  
