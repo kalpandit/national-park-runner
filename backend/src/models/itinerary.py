@@ -1,11 +1,12 @@
 from itinerary_object import itinerary_object
 from pymongo import MongoClient
 from user import user
+from yelp import model
 
 
 class itinerary:
 
-    def __init__(self, difficulty, cost):
+    def __init__(self, difficulty, cost, location):
 
         # A list of itinerary_objects
         self.itinerary_objects_morning = []
@@ -22,9 +23,21 @@ class itinerary:
 
         self.objs_used = {}
         self.food = True
+
+        breakfast=[]
+        lunch=[]
+        dinner=[]
+
+        breakfast.append(list(model.search_businesses("Breakfast", location,  max_price=cost, limit=5)))
+        lunch.append(list(model.search_businesses("Lunch", location,  max_price=cost, limit=5)))
+        dinner.append(list(model.search_businesses("Dinner", location,  max_price=cost, limit=5)))
     
     def populate_itinerary(self, itinerary_object_: itinerary_object):
         new_itinerary = []
+        
+
+
+
         self.objs_used.clear()
         inserted = False
 
