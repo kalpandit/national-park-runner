@@ -13,11 +13,12 @@ def convert_json(file_path="nationalparks.csv"):
         activity = {}
         activity['name'] = value['Name']
         activity['type'] = value['Type']
-        activity['difficulty'] = value['Difficulty:']
-        activity['length'] = value['Length:']
-        activity['Accessible'] = value['Accessible:']
-        activity['Education'] = value['Education:']
+        activity['difficulty'] = value['Difficulty']
+        activity['length'] = value['Length']
+        activity['Accessible'] = value['Accessible']
+        activity['Education'] = value['Education']
         activity['Rating'] = value['Rating']
+        activity['time_of_day'] = value['TOD']
     
         national_parks[value['National Park']].append(activity)
 
