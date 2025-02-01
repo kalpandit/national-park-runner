@@ -6,6 +6,5 @@ export default [
   route("copilot-itinerary", "pages/CopilotItinerary.tsx"), // Itinerary Home route
   route("login", "routes/login.tsx"), // Itinerary Home route
   route("register", "routes/register.tsx"), // Itinerary Home route
-
-
+  route("profile", "pages/ProfilePage.tsx"), // ✅ Added Profile Page
 ] satisfies RouteConfig;
