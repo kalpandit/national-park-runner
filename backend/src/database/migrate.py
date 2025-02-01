@@ -1,6 +1,7 @@
 import pandas as pd
 from collections import defaultdict
 import json
+from database import mongo
 
 def convert_json(file_path):
 
@@ -23,4 +24,9 @@ def convert_json(file_path):
     json_string = json.dumps(national_parks)
     return json_string
 
-json_string = convert_json("nationalparks.csv")
+
+
+def seed_data():
+
+    json_string = convert_json("nationalparks.csv")
+    
