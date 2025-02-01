@@ -39,17 +39,66 @@ class itinerary:
         #the mornign afternoon and night with 5 star medium difficulty ratings and if there aren't enough, then go down to easy rating
 
         # time_filter = {} if self. == "all" else {"time_of_day": preferred_time}
-    
 
+        #MORNING
         query = {"difficulty": self.difficulty , "time_of_day": "Morning" }  # Filter by difficulty and time of day
         top_activities = collection.find(query).sort("Rating", -1).limit(3)  # Sort by Rating (descending)
         top_3_morning=list(top_activities)
         self.itinerary_objects_morning.append(top_3_morning)
-        
-        if len(top_3_morning)<3:
-            #work on this logic later
-                    
+        if len(top_3_morning)<3 and self.difficulty=="Hard":
+            query = {"difficulty": "Medium" , "time_of_day": "Morning" }  # Filter by difficulty and time of day
+            remaining = 3-len(top_3_morning)
+            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
+            self.itinerary_objects_morning.append(list(top_activities))
+        if len(top_3_morning)<3 and self.difficulty=="Medium":
+            query = {"difficulty": "Easy" , "time_of_day": "Morning" }  # Filter by difficulty and time of day
+            remaining = 3-len(top_3_morning)
+            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
+            self.itinerary_objects_morning.append(list(top_activities))
 
+        top_activities = collection.find(query).sort("Rating", -1) # Sort by Rating (descending)
+        top_activities=top_activities[3:]
+        self.alternative_options_morning.append(top_activities)
+
+        #NOON
+        query = {"difficulty": self.difficulty , "time_of_day": "Noon" }  # Filter by difficulty and time of day
+        top_activities = collection.find(query).sort("Rating", -1).limit(3)  # Sort by Rating (descending)
+        top_3_noon=list(top_activities)
+        self.itinerary_objects_noon.append(top_3_noon)
+        
+        if len(top_3_noon)<3 and self.difficulty=="Hard":
+            query = {"difficulty": "Medium" , "time_of_day": "Noon" }  # Filter by difficulty and time of day
+            remaining = 3-len(top_3_noon)
+            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
+            self.itinerary_objects_noon.append(list(top_activities))
+        if len(top_3_noon)<3 and self.difficulty=="Medium":
+            query = {"difficulty": "Easy" , "time_of_day": "Noon" }  # Filter by difficulty and time of day
+            remaining = 3-len(top_3_noon)
+            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
+            self.itinerary_objects_noon.append(list(top_activities))
+        
+        top_activities = collection.find(query).sort("Rating", -1) # Sort by Rating (descending)
+        top_activities=top_activities[3:]
+        self.alternative_options_noon.append(top_activities)
+
+        #NIGHT
+        query = {"difficulty": self.difficulty , "time_of_day": "Night" }  # Filter by difficulty and time of day
+        top_activities = collection.find(query).sort("Rating", -1).limit(3)  # Sort by Rating (descending)
+        top_3_night=list(top_activities)
+        self.itinerary_objects_night.append(top_3_night)
+        if len(top_3_night)<3 and self.difficulty=="Hard":
+            query = {"difficulty": "Medium" , "time_of_day": "Noon" }  # Filter by difficulty and time of day
+            remaining = 3-len(top_3_night)
+            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
+            self.itinerary_objects_night.append(list(top_activities))
+        if len(top_3_night)<3 and self.difficulty=="Medium":
+            query = {"difficulty": "Easy" , "time_of_day": "Noon" }  # Filter by difficulty and time of day
+            remaining = 3-len(top_3_night)
+            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
+            self.itinerary_objects_night.append(list(top_activities))
+        top_activities = collection.find(query).sort("Rating", -1) # Sort by Rating (descending)
+        top_activities=top_activities[3:]
+        self.alternative_options_night.append(top_activities)
         
 
         # for obj in self.itinerary_objects:
@@ -65,7 +114,7 @@ class itinerary:
         # if not inserted:
         #     new_itinerary.append(itinerary_object_)
 
-        self.itinerary_objects = new_itinerary
+        #self.itinerary_objects = new_itinerary
 
     # def remove_object(self, itinerary_object_: itinerary_object):
     #     isDeleted=False
