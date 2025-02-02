@@ -1,11 +1,12 @@
 from itinerary_object import itinerary_object
 from pymongo import MongoClient
 from user import user
+from yelp import model
 
 
 class itinerary:
 
-    def __init__(self, difficulty, cost):
+    def __init__(self, difficulty, cost, location):
 
         # A list of itinerary_objects
         self.itinerary_objects_morning = []
@@ -23,10 +24,12 @@ class itinerary:
         self.objs_used = {}
         self.food = True
     
-    def populate_itinerary(self, itinerary_object_: itinerary_object):
-        new_itinerary = []
+    def populate_itinerary(self):
+        #new_itinerary = []
+        
+
         self.objs_used.clear()
-        inserted = False
+        #inserted = False
 
         client = MongoClient("mongodb://localhost:27017/")  # check if this is correct
         db = client["npr_db"]  # Replace with your database name

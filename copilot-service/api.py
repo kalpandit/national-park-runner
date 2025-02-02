@@ -121,6 +121,10 @@ def propose_change():
     {current_itinerary}
 
     - Each activity you propose should be distinct and include:
+    The current itinerary is as follows:
+    {current_itinerary}
+
+    - Each activity you propose should include:
       - Type
       - Name
       - time of day (morning, afternoon, evening, night -- call the field time_of_day) -- should be the same as the activity whose change is proposed.
@@ -129,6 +133,10 @@ def propose_change():
       - accessible: boolean - must be lowercase;
       - Education (short learning aspect) -- must be included
       - Rating (out of 5)
+      - Accessible (true/false)
+      - Education (short learning aspect)
+      - Rating (out of 5)
+    - Include food recommendations if applicable.
 
     Activity:
   accessible: boolean;
@@ -162,7 +170,6 @@ ItineraryData -->
         # Extract content and parse as JSON
         itinerary_json = response.text.strip('```json\n').strip('```')
         print(itinerary_json)
-
 
         try:
             json_data = json.loads(itinerary_json)
