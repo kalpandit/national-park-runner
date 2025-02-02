@@ -5,6 +5,7 @@ from flask import Flask
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from src.database.migrate import convert_json
+from src.models.itinerary import itinerary
 
 
 uri = os.getenv("MONGO_URI")
@@ -66,7 +67,20 @@ def hello_world():
                 "food":False
             }
         )
-    
+    def create_itinerary(difficulty, cost):
+
+        itinerary_ = itinerary(difficulty, cost, location=None)
+        itinerary_.populate_itinerary()
+        return None
+
+    create_itinerary("Hard", 2)
+    # query = {"difficulty": "Medium" , "time_of_day": {"$in": ["Morning", "All"]} }  # Filter by difficulty and time of day
+    # top_activities = mc.find(query).sort("Rating", -1).limit(3)
+
+    # top_3_morning=list(top_activities)
+    # print(top_3_morning)
+    print("fuck")
+
     return "<p>Hello, World!</p>"
 
 if __name__ == "__main__":
