@@ -14,9 +14,6 @@ db = client['npr_db']
 mc = db['model_collection']
 
 
-# from yelp import model
-
-
 class itinerary:
 
     def __init__(self, difficulty, cost, location):
@@ -35,22 +32,9 @@ class itinerary:
         self.cost=cost
 
         self.objs_used = {}
-        self.food = True
-
-        breakfast=[]
-        lunch=[]
-        dinner=[]
-
-        # breakfast.append(list(model.search_businesses("Breakfast", location,  max_price=cost, limit=5)))
-        # lunch.append(list(model.search_businesses("Lunch", location,  max_price=cost, limit=5)))
-        # dinner.append(list(model.search_businesses("Dinner", location,  max_price=cost, limit=5)))
     
     def populate_itinerary(self):
         new_itinerary = []
-        
-
-
-
         self.objs_used.clear()
         inserted = False
 

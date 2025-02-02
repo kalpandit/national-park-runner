@@ -7,6 +7,7 @@ from src.database.migrate import convert_json
 from src.models.itinerary import itinerary
 from flask import request, jsonify, Flask
 import src.yelp.model as yelp_model
+from bson.objectid import ObjectId
 
 uri = os.getenv("MONGO_URI")
 
@@ -126,7 +127,7 @@ def add_user():
 
     return
 
-@app.route("/yelp", method=['POST'])
+@app.route("/yelp", method=['GET'])
 def get_yelp():
 
     data = request.json
@@ -167,6 +168,39 @@ def update_itinerary():
             return jsonify({"message": "No changes made"}), 200
 
         return jsonify({"message": "Itinerary updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/get-itinerary", methods=['GET'])
+def get_itinerary():
+    try:
+        data = request.json
+        email = data.get('emailaddress')  # Extract email
+
+        if not email:
+            return jsonify({"error": "Missing emailaddress"}), 400
+
+        # Step 1: Query `uc` collection to get itinerary IDs
+        itinerary_cursor = uc.find({"emailaddress": email}, {"itinerary_id": 1, "_id": 0})
+        itinerary_ids = [entry["itinerary_id"] for entry in itinerary_cursor]
+
+        if not itinerary_ids:
+            return jsonify({"message": "No itineraries found for this email"}), 404
+
+        # Step 2: Query `ic` collection using itinerary_ids (which are already strings)
+        itinerary_details_cursor = ic.find({"_id": {"$in": itinerary_ids}})
+
+        # Convert MongoDB cursor to list of dictionaries
+        itineraries = []
+        for itinerary in itinerary_details_cursor:
+            itinerary["_id"] = str(itinerary["_id"])  # Convert `_id` to string for consistency
+            itineraries.append(itinerary)
+
+        if not itineraries:
+            return jsonify({"message": "Itinerary IDs found, but no itinerary details available"}), 404
+
+        return jsonify({"itineraries": itineraries}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
