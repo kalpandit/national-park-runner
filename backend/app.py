@@ -123,6 +123,7 @@ def create_itin():
 
         # Create itinerary object
         itinerary_obj = itinerary(difficulty, cost, location, emailaddress)
+        print("hello")
         itinerary_obj.populate_itinerary()
 
         # ✅ Fix: Ensure result_dict is a dictionary (not a string)
@@ -147,15 +148,25 @@ def create_itin():
 def get_single_itin():
     try:
         _id = request.args.get("_id")
-        # emailaddress = request.args.get("email")
-        
-        itin = ic.find_one({"_id": _id})
+
+        if not _id:
+            return jsonify({"error": "Missing _id parameter"}), 400
+
+        try:
+            object_id = ObjectId(_id)  # Convert string to ObjectId
+        except Exception:
+            return jsonify({"error": "Invalid _id format"}), 400
+
+        itin = ic.find_one({"_id": object_id})
+
+        if not itin:
+            return jsonify({"error": "Itinerary not found"}), 404
 
         serialized_result = serialize_object(itin)
 
         return jsonify({
             "itinerary": serialized_result
-        }), 201
+        }), 200  # Use 200 for successful GET responses
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -214,22 +225,30 @@ def add_user():
 
 @app.route("/yelp", methods=['GET'])
 def get_yelp():
+    try:
+        # Use request.args for GET parameters
+        term = request.args.get('term', "Breakfast")
+        location = request.args.get('location', "Yosemite Valley")
+        max_cost = request.args.get('price', 4, type=int)  # Ensure price is an integer
 
-    data = request.json
-    term = data.get('term', "Breakfast")
-    location = data.get('location', "Yosemite Valley")
-    max_cost = data.get('price', 4)
-    result = yelp_model.search_businesses(term, location, max_cost)
-    return result
+        # Call Yelp API or model function
+        result = yelp_model.search_businesses(term, location, max_cost)
+
+        # Ensure response is JSON serializable
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/update-itinerary", methods=['POST'])
 def update_itinerary():
     try:
         data = request.json
-        
-        # Extract itinerary_id and updated fields
-        itinerary_id = data.get('itinerary_id')  # Ensure the key exists
-        update_fields = data
+        print(data)  # Debugging
+
+        # Extract itinerary_id and update fields
+        itinerary_id = data.get('_id')  
+        update_fields = data.get('updatedItinerary')
 
         if not itinerary_id or not update_fields:
             return jsonify({"error": "Missing itinerary_id or updates"}), 400
@@ -240,9 +259,12 @@ def update_itinerary():
         except Exception:
             return jsonify({"error": "Invalid itinerary_id format"}), 400
 
+        # Ensure '_id' is not in update_fields
+        update_fields.pop('_id', None)  
+
         # Update the itinerary
         result = ic.update_one(
-            {"_id": itinerary_object_id},  # Find by itinerary_id
+            {"_id": itinerary_object_id},  # Find by ID
             {"$set": update_fields}  # Update only provided fields
         )
 
@@ -318,7 +340,8 @@ def save_itinerary():
             "food": False,  # Default food option
             "difficulty": data.get("difficulty", "Medium"),
             "cost": data.get("cost", 0),
-            "location": data.get("location", "")
+            "location": data.get("location", ""),
+            "generative_data": data
         }
 
         # Save to MongoDB

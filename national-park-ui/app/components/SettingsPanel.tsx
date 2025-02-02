@@ -45,6 +45,7 @@ function SettingsContent() {
         cost: (user.unsafeMetadata as { cost?: string }).cost || "$$",
         accessibility: (user.unsafeMetadata as { accessibility?: string }).accessibility || "Doesn't Need Accessible",
       });
+      console.log(preferences)
     }
   }, [user]);
 
@@ -89,7 +90,7 @@ function SettingsContent() {
             email: user?.primaryEmailAddress?.emailAddress,
             cost: preferences.cost,
             difficulty: preferences.difficulty,
-            location: "Yellowstone National Park"
+            location: "Yellowstone"
           }
         });
         const res2 = await axios.get('http://127.0.0.1:6464/create-itinerary', {
@@ -188,8 +189,8 @@ function SettingsContent() {
               className="w-full p-2 mt-1 border rounded-md bg-gray-100 dark:bg-gray-700"
             >
               <option>Easy</option>
-              <option>Moderate</option>
-              <option>Difficult</option>
+              <option>Medium</option>
+              <option>Hard</option>
             </select>
 
             {/* Cost Selection */}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { DndContext, closestCorners, type DragEndEvent } from "@dnd-kit/core";
 import { useUser } from "@clerk/clerk-react";
@@ -16,6 +16,8 @@ import {
   ArrowLeftIcon,
 } from "@heroicons/react/24/solid";
 import Chatbot from "./Chatbot";
+import { useLocation } from "react-router-dom";
+import Yelp from "~/components/Yelp";
 
 const API_URL = "http://127.0.0.1:6464";
 
@@ -190,8 +192,8 @@ const SortableItem: React.FC<SortableItemProps> = ({
   );
 };
 
-// -- SortableItem Component --
-const CopilotItinerary: React.FC = () => {
+
+const CopilotItinerary = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [itinerary, setItinerary] = useState<ItineraryData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -199,6 +201,11 @@ const CopilotItinerary: React.FC = () => {
   const [showItinerary, setShowItinerary] = useState(false);
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress
+
+  const location = useLocation();
+  const initialData = location.state?.initialData || null; // ✅ Extract state safely
+
+  const [data, setData] = useState(initialData);
 
   const [alternatives, setAlternatives] = useState<{
     [key: string]: Activity[];
@@ -282,6 +289,14 @@ const CopilotItinerary: React.FC = () => {
       alert(lastError); // Notify the user
     }
   };
+
+  useEffect(() => {
+    if (initialData) {
+      console.log("hiii")
+      setItinerary(initialData);
+      setShowItinerary(true);
+    }
+  }, [initialData]);
 
   // Fetch itinerary
   const fetchItinerary = async () => {
@@ -418,12 +433,14 @@ const CopilotItinerary: React.FC = () => {
           </div>
 
           {/* Save Itinerary Button */}
-            <button
+            {!initialData && (
+              <button
               onClick={saveItineraryToBackend}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg mt-4 transition"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg -mt-16 mb-8 transition"
             >
               Save Itinerary
             </button>
+            )}
 
           {/* DnDContext wraps the entire itinerary of days */}
           <DndContext
@@ -463,6 +480,7 @@ const CopilotItinerary: React.FC = () => {
               </div>
             ))}
           </DndContext>
+          <Yelp location={itinerary.name}></Yelp>
         </div>
       )}
       <Chatbot></Chatbot>

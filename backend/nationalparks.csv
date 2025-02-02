@@ -1,35 +1,35 @@
 National Park,Type,Name,Difficulty,Length,Accessible,Education,Rating,TOD
-Yosemite National Park,Activity,Yosemite Falls Hike,Medium,3 hours,No,FALSE,4,All
-Yosemite National Park,Food,Food:Lunch,Easy,2 hours,Yes,FALSE,5,Noon
-Yosemite National Park,Food,Food: Breakfast,Easy,1 hours,Yes,FALSE,5,Morning
-Yosemite National Park,Food,Food:Dinner,Easy,2 hours,Yes,FALSE,5,Night
+Yosemite National Park,Activity,Yosemite Falls Hike,Medium,3,No,FALSE,4,All
+Yosemite National Park,Food,Food:Lunch,Easy,2,Yes,FALSE,5,Noon
+Yosemite National Park,Food,Food: Breakfast,Easy,1,Yes,FALSE,5,Morning
+Yosemite National Park,Food,Food:Dinner,Easy,2,Yes,FALSE,5,Night
 Yosemite National Park,Activity,Camping,Hard,Entire,No,FALSE,5,All
 Yosemite National Park,Activity,Backpacking,Hard,Entire,No,TRUE,5,All
-Yosemite National Park,Activity,Valley Floor Tour,Easy,2 hours,Yes,TRUE,5,All
-Yosemite National Park,Activity,Glacier Point Tour,Easy,4 hours,Yes,TRUE,5,All
-Yosemite National Park,Activity,Grand Tour ,Easy,8 hours,Yes,TRUE,5,Morning
-Yosemite National Park,Activity,Tuolumne Meadows Hikers Bus,Easy,8 hours,Yes,TRUE,5,Morning
-Yosemite National Park,Activity,Yosemite After Dark,Easy,1.5 hours,Yes,TRUE,5,Night
-Yosemite National Park,Activity,Walking Starry Skies (Winter Only),Easy,1 hours,No,TRUE,5,Night
-Yosemite National Park,Activity,Glacier Point Starry Night Skies,Easy,1 hours,Yes,TRUE,5,Night
-Yosemite National Park,Activity,Historic Ahwahnee Hotel Tour,Easy,1 hours,Yes,TRUE,3,All
-Yosemite National Park,Activity,Guided Nature Walks,Medium,1 hours,No,TRUE,4,All
-Yosemite National Park,Activity,Photography Walks,Medium,3 hours,No,TRUE,3,All
-Yosemite National Park,Activity,Birdwatching,Medium,3 hours,No,TRUE,4,All
-Yosemite National Park,Activity,Rock Climbing,Hard,3 hours,No,FALSE,4,All
-Yosemite National Park,Activity,Boating and Rafting,Medium,3 hours,No,FALSE,5,All
-Yosemite National Park,Activity,Fishing,Medium,3 hours,Yes,FALSE,4,All
-Yosemite National Park,Activity,Swimming,Medium,1.5 hours,No,FALSE,4,All
-Yosemite National Park,Activity,Cross-Country Skiing and Snowshoeing,Medium,12 hours,No,FALSE,3,All
-Yosemite National Park,Activity,Downhill Skiing and Snowboarding,Medium,12 hours,No,FALSE,4,All
-Yellowstone,Activity,Yellowstone & Grand Teton Day Tour,Easy,12 hours,No,TRUE,4,All
-Yellowstone,Activity,Best of Yellowstone,Easy,8 hours,No,TRUE,5,All
-Yellowstone,Activity,Big Sky Wildlife Safari,Medium,8 hours,No,TRUE,5,All
-Yellowstone,Activity,Yellowstone Wildlife Safari Tour,Medium,8 hours,No,TRUE,4,All
-Yellowstone,Activity,Yellowstone Winter Wildlife Safari,Easy,6 hours,No,TRUE,4,All
-Yellowstone,Activity,Big Sky Adventure,Medium,6 hours,No,TRUE,4,All
-Yellowstone,Activity,Yellowstone Walking Safari,Medium,8 hours,No,FALSE,4,All
-Yellowstone,Activity,Yellowstone Photography Tour & Wildlife Safari,Easy,8 hours,No,FALSE,5,All
-Yellowstone,Food,Lunch,Easy,1.5 hours,Yes,FALSE,5,Noon
-Yellowstone,Food,Dinner,Easy,2 hours,Yes,FALSE,5,Night
-Yellowstone,Food,Breakfast,Easy,1 hour,Yes,FALSE,5,Morning
+Yosemite National Park,Activity,Valley Floor Tour,Easy,2,Yes,TRUE,5,All
+Yosemite National Park,Activity,Glacier Point Tour,Easy,4,Yes,TRUE,5,All
+Yosemite National Park,Activity,Grand Tour ,Easy,8,Yes,TRUE,5,Morning
+Yosemite National Park,Activity,Tuolumne Meadows Hikers Bus,Easy,8,Yes,TRUE,5,Morning
+Yosemite National Park,Activity,Yosemite After Dark,Easy,1.5,Yes,TRUE,5,Night
+Yosemite National Park,Activity,Walking Starry Skies (Winter Only),Easy,1,No,TRUE,5,Night
+Yosemite National Park,Activity,Glacier Point Starry Night Skies,Easy,1,Yes,TRUE,5,Night
+Yosemite National Park,Activity,Historic Ahwahnee Hotel Tour,Easy,1,Yes,TRUE,3,All
+Yosemite National Park,Activity,Guided Nature Walks,Medium,1,No,TRUE,4,All
+Yosemite National Park,Activity,Photography Walks,Medium,3,No,TRUE,3,All
+Yosemite National Park,Activity,Birdwatching,Medium,3,No,TRUE,4,All
+Yosemite National Park,Activity,Rock Climbing,Hard,3,No,FALSE,4,All
+Yosemite National Park,Activity,Boating and Rafting,Medium,3,No,FALSE,5,All
+Yosemite National Park,Activity,Fishing,Medium,3,Yes,FALSE,4,All
+Yosemite National Park,Activity,Swimming,Medium,1.5,No,FALSE,4,All
+Yosemite National Park,Activity,Cross-Country Skiing and Snowshoeing,Medium,12,No,FALSE,3,All
+Yosemite National Park,Activity,Downhill Skiing and Snowboarding,Medium,12,No,FALSE,4,All
+Yellowstone,Activity,Yellowstone & Grand Teton Day Tour,Easy,12,No,TRUE,4,All
+Yellowstone,Activity,Best of Yellowstone,Easy,8,No,TRUE,5,All
+Yellowstone,Activity,Big Sky Wildlife Safari,Medium,8,No,TRUE,5,All
+Yellowstone,Activity,Yellowstone Wildlife Safari Tour,Medium,8,No,TRUE,4,All
+Yellowstone,Activity,Yellowstone Winter Wildlife Safari,Easy,6,No,TRUE,4,All
+Yellowstone,Activity,Big Sky Adventure,Medium,6,No,TRUE,4,All
+Yellowstone,Activity,Yellowstone Walking Safari,Medium,8,No,FALSE,4,All
+Yellowstone,Activity,Yellowstone Photography Tour & Wildlife Safari,Easy,8,No,FALSE,5,All
+Yellowstone,Food,Lunch,Easy,1.5,Yes,FALSE,5,Noon
+Yellowstone,Food,Dinner,Easy,2,Yes,FALSE,5,Night
+Yellowstone,Food,Breakfast,Easy,1,Yes,FALSE,5,Morning
