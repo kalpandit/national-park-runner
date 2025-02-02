@@ -10,4 +10,6 @@ export default [
   route("chatbot", "pages/Chatbot.tsx"), // Itinerary Home route
   route("maps", "pages/Maps.tsx"), // Itinerary Home route
   route("intro", "pages/IntroItinerary.tsx"), // Itinerary Home route
+  route("single/:id", "pages/SingleItinerary.tsx"), // Itinerary Home route
+
 ] satisfies RouteConfig;
