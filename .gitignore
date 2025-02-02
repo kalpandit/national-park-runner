@@ -1,5 +1,8 @@
 .env
 /venv
+*.cpython*.
+*.cpython-*.pyo
+__pycache__/
 .DS_Store
 national-park-ui/node_modules/
 

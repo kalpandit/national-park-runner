@@ -1,12 +1,13 @@
 import os
 import json
 import numpy as np
-from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from src.database.migrate import convert_json
-from yelp import model
-
+from src.models.itinerary import itinerary
+from flask import request, jsonify, Flask
+import src.yelp.model as yelp_model
+from bson.objectid import ObjectId
 
 uri = os.getenv("MONGO_URI")
 
@@ -25,28 +26,6 @@ db = client['npr_db']
 uc = db['user_collection']
 mc = db['model_collection']
 ic = db['itinerary_collection']
-
-
-@app.route("/yelp")
-def get_food_recommendations():
-    breakfast=[]
-    lunch=[]
-    dinner=[]
-    location = request.args.get("location")
-    cost = request.args.get("cost")
-
-    breakfast.append(list(model.search_businesses("Breakfast", location,  max_price=cost, limit=5)))
-    lunch.append(list(model.search_businesses("Lunch", location,  max_price=cost, limit=5)))
-    dinner.append(list(model.search_businesses("Dinner", location,  max_price=cost, limit=5)))
-
-    return jsonify({
-    'breakfast': breakfast,
-    'lunch': lunch,
-    'dinner': dinner
-    })
-
-
-
 
 @app.route("/")
 def hello_world():
@@ -89,8 +68,188 @@ def hello_world():
                 "food":False
             }
         )
-    
+    # def create_itinerary(difficulty, cost):
+
+    #     itinerary_ = itinerary(difficulty, cost, location=None)
+    #     itinerary_.populate_itinerary()
+    #     return None
+
+    # create_itinerary("Hard", 2)
+    # query = {"difficulty": "Medium" , "time_of_day": {"$in": ["Morning", "All"]} }  # Filter by difficulty and time of day
+    # top_activities = mc.find(query).sort("Rating", -1).limit(3)
+
+    # top_3_morning=list(top_activities)
+    # print(top_3_morning)
+    print("fuck")
+
     return "<p>Hello, World!</p>"
+
+
+def serialize_object(obj):
+    """ Recursively converts ObjectId and other non-serializable types to JSON-safe formats. """
+    if isinstance(obj, dict):
+        return {key: serialize_object(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [serialize_object(item) for item in obj]
+    elif isinstance(obj, ObjectId):
+        return str(obj)  # Convert ObjectId to a string
+    else:
+        return obj  # Return as is
+
+@app.route("/create-itinerary", methods=['GET'])
+def create_itin():
+    try:
+        data = request.json
+
+        # Extracting required fields with defaults
+        emailaddress = data.get("email")
+        if not emailaddress:
+            return jsonify({"error": "Missing required field: email"}), 400
+
+        cost = data.get("cost", 4)
+        difficulty = data.get("difficulty", "Hard")
+        location = data.get("location", "Yosemite National Park")
+
+        # Create itinerary object
+        itinerary_obj = itinerary(difficulty, cost, location, emailaddress)
+        itinerary_obj.populate_itinerary()
+
+        # ✅ Fix: Ensure result_dict is a dictionary (not a string)
+        result_dict = itinerary_obj.convert_to_json()  # Likely a JSON string
+
+        print("Converted JSON back to dict:", result_dict)
+
+        # ✅ Insert into `ic` (itinerary collection)
+        insert_result = ic.insert_one(result_dict)
+        print("Inserted correctly")
+
+        # ✅ Convert inserted MongoDB document for safe JSON response
+        inserted_itinerary = ic.find_one({"_id": insert_result.inserted_id})
+        serialized_result = serialize_object(inserted_itinerary)
+
+        return jsonify({"message": "Itinerary created successfully", "itinerary": serialized_result}), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/update-preferences", methods=['POST'])
+def update_preferences():
+    try:
+        data = request.json
+        emailaddress = data['email']
+        cost = data['cost']
+        accessibility = data['accessibility']  # Fixed typo (accessability -> accessibility)
+        difficulty = data['difficulty']
+
+        # Update document
+        result = uc.update_one(
+            {"email": emailaddress},  # Query condition
+            {"$set": {
+                "cost": cost,
+                "accessibility": accessibility,
+                "difficulty": difficulty
+            }}
+        )
+
+        # Check if document was found and updated
+        if result.matched_count == 0:
+            return jsonify({"message": "No document found with this email address"}), 404
+        elif result.modified_count == 0:
+            return jsonify({"message": "No changes made"}), 200
+
+        return jsonify({"message": "Preferences updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/users", methods=['POST'])
+def add_user():
+    try: 
+        data = request.json
+        emailaddress = data.get("email")
+
+        if not emailaddress:
+            return jsonify({"error": "Missing email field"}), 400
+
+        # Insert the new user
+        result = uc.insert_one({"email": emailaddress})
+
+        if result.inserted_id:
+            return jsonify({"message": "User added successfully", "user_id": str(result.inserted_id)}), 201
+        else:
+            return jsonify({"error": "User insertion failed"}), 500
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/yelp", methods=['GET'])
+def get_yelp():
+
+    data = request.json
+    term = data.get('term', "Breakfast")
+    location = data.get('location', "Yosemite Valley")
+    max_cost = data.get('price', 4)
+    result = yelp_model.search_businesses(term, location, max_cost)
+    return result
+
+@app.route("/update-itinerary", methods=['POST'])
+def update_itinerary():
+    try:
+        data = request.json
+        
+        # Extract itinerary_id and updated fields
+        itinerary_id = data.get('itinerary_id')  # Ensure the key exists
+        update_fields = data
+
+        if not itinerary_id or not update_fields:
+            return jsonify({"error": "Missing itinerary_id or updates"}), 400
+
+        # Convert string ID to ObjectId
+        try:
+            itinerary_object_id = ObjectId(itinerary_id)
+        except Exception:
+            return jsonify({"error": "Invalid itinerary_id format"}), 400
+
+        # Update the itinerary
+        result = ic.update_one(
+            {"_id": itinerary_object_id},  # Find by itinerary_id
+            {"$set": update_fields}  # Update only provided fields
+        )
+
+        # Response based on update results
+        if result.matched_count == 0:
+            return jsonify({"message": "No itinerary found with this ID"}), 404
+        elif result.modified_count == 0:
+            return jsonify({"message": "No changes made"}), 200
+
+        return jsonify({"message": "Itinerary updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/get-itinerary", methods=['GET'])
+def get_itinerary():
+    try:
+        data = request.json
+        email = data.get('email')  # Extract email
+
+        if not email:
+            return jsonify({"error": "Missing emailaddress"}), 400
+
+        # ✅ Find all itineraries where emailaddress matches
+        itinerary_cursor = ic.find({"emailaddress": email})
+
+        # ✅ Convert cursor to list and ensure ObjectIds are serializable
+        itineraries = [serialize_object(itinerary) for itinerary in itinerary_cursor]
+
+        if not itineraries:
+            return jsonify({"message": "No itineraries found for this email"}), 404
+
+        return jsonify({"itineraries": itineraries}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
