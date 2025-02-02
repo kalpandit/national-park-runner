@@ -127,7 +127,7 @@ class itinerary:
                 query = {"difficulty": curr_diff, "park": self.location, "time_of_day": "All"}
                 remaining = 2 - len(alternative_options[time_of_day])
                 if remaining <= 0:
-                    continue
+                    break
                 top_activities = list(mc.find(query).sort("Rating", -1))
                 for activity in top_activities:
                     if activity['name'] in self.objects_used:
