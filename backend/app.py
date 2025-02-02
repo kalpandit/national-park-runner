@@ -215,13 +215,20 @@ def add_user():
 
 @app.route("/yelp", methods=['GET'])
 def get_yelp():
+    try:
+        # Use request.args for GET parameters
+        term = request.args.get('term', "Breakfast")
+        location = request.args.get('location', "Yosemite Valley")
+        max_cost = request.args.get('price', 4, type=int)  # Ensure price is an integer
 
-    data = request.json
-    term = data.get('term', "Breakfast")
-    location = data.get('location', "Yosemite Valley")
-    max_cost = data.get('price', 4)
-    result = yelp_model.search_businesses(term, location, max_cost)
-    return result
+        # Call Yelp API or model function
+        result = yelp_model.search_businesses(term, location, max_cost)
+
+        # Ensure response is JSON serializable
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/update-itinerary", methods=['POST'])
 def update_itinerary():
