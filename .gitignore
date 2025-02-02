@@ -7,4 +7,5 @@ national-park-ui/node_modules/
 national-park-ui/.react-router/
 national-park-ui/build/
 national-park-ui/package-lock.json/
+**/.env
 

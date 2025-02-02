@@ -60,6 +60,7 @@ They provide habitats for diverse species and offer visitors a chance to explore
   },
 ];
 
+
 const RunningSlider: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -92,6 +93,8 @@ const RunningSlider: React.FC = () => {
     setIsPaused(false);
   };
 
+
+
   // Detect when the journey ends and reset runner image
   useEffect(() => {
     if (isRunning && !isPaused) {
@@ -107,6 +110,9 @@ const RunningSlider: React.FC = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden flex z-10">
+    {/* hack: hard-load color classes */}
+    <div className='hidden bg-red-800 bg-green-900 bg-green-800 bg-orange-600 bg-green 800'></div>
+
       {/* Walking Path Background - Creates an infinite loop effect */}
       <div className='bg-green-900 bg-green-800 bg-orange-600 bg-red-800 bg-orange-700'></div>
       <div
