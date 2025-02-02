@@ -12,7 +12,7 @@ class user:
         if typeChange == "allergies":
             self.allergies=newValue
         elif typeChange == "accessability":
-            self.accessability=newValue
+            self.accessability = newValue
         elif typeChange == "cost":
             self.cost=newValue
         elif typeChange == "difficulty":

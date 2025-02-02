@@ -1,11 +1,11 @@
 import os
 import json
 import numpy as np
-from flask import Flask
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from src.database.migrate import convert_json
 from src.models.itinerary import itinerary
+from flask import request, jsonify, Flask
 
 
 uri = os.getenv("MONGO_URI")
@@ -82,6 +82,49 @@ def hello_world():
     print("fuck")
 
     return "<p>Hello, World!</p>"
+
+@app.route("/update-preferences", methods=['POST'])
+def update_preferences():
+    try:
+        data = request.json
+        emailaddress = data['email']
+        cost = data['cost']
+        accessibility = data['accessibility']  # Fixed typo (accessability -> accessibility)
+        difficulty = data['difficulty']
+
+        # Update document
+        result = uc.update_one(
+            {"email": emailaddress},  # Query condition
+            {"$set": {
+                "cost": cost,
+                "accessibility": accessibility,
+                "difficulty": difficulty
+            }}
+        )
+
+        # Check if document was found and updated
+        if result.matched_count == 0:
+            return jsonify({"message": "No document found with this email address"}), 404
+        elif result.modified_count == 0:
+            return jsonify({"message": "No changes made"}), 200
+
+        return jsonify({"message": "Preferences updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/users", method=['POST']) # needs a "insert_one db call"
+def add_user():
+    data = request.json
+    newUser = data.get('user', {})
+
+    client.npr_db.user_collection.insert_one(
+        {
+            "email": newUser['email'],
+        }
+    )
+
+    return
 
 if __name__ == "__main__":
     app.run(debug=True)
