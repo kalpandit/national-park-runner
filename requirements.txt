@@ -2,3 +2,5 @@ pandas
 Flask
 pymongo
 requests
+flask-cors
+google-generativeai

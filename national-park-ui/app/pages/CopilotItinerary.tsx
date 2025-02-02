@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { DndContext, closestCorners, type DragEndEvent } from "@dnd-kit/core";
+import { useUser } from "@clerk/clerk-react";
 import {
   arrayMove,
   SortableContext,
@@ -16,13 +17,13 @@ import {
 } from "@heroicons/react/24/solid";
 import Chatbot from "./Chatbot";
 
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "http://127.0.0.1:6464";
 
 type Activity = {
   accessible: boolean;
   difficulty: string;
-  education: string;
-  name: string;
+  description: string;
+  name:string;
   rating: number;
   time: number;
   type: string;
@@ -116,7 +117,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
       </div>
 
       <h3 className="text-xl font-semibold">{activity.name}</h3>
-      <p className="text-gray-600">{activity.education}</p>
+      <p className="text-gray-600">{activity.description}</p>
 
       <div className="flex items-center mt-2 text-gray-600">
         <span className="capitalize">{activity.type} {activity.difficulty && `- ${activity.difficulty}`}</span>
@@ -153,7 +154,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
             {alternatives.map((alt, idx) => (
               <div key={idx} className="p-4 rounded-lg bg-gray-50">
                 <h1 className="text-lg">{alt.name}</h1>
-                <p className="text-md">{alt.education}</p>
+                <p className="text-md">{alt.description}</p>
                 <div className="flex items-center mt-2 text-gray-600">
                   <span className="capitalize">
                     {alt.type} {alt.difficulty && `- ${alt.difficulty}`}
@@ -196,6 +197,8 @@ const CopilotItinerary: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showItinerary, setShowItinerary] = useState(false);
+  const { user } = useUser();
+  const email = user?.primaryEmailAddress?.emailAddress
 
   const [alternatives, setAlternatives] = useState<{
     [key: string]: Activity[];
@@ -290,12 +293,31 @@ const CopilotItinerary: React.FC = () => {
       const response = await axios.post(`${API_URL}/generate_itinerary`, {
         info_request: userPrompt,
       });
+      console.log("correct?");
+      console.log(response.data);
       setItinerary(response.data);
       setTimeout(() => setShowItinerary(true), 500);
     } catch (err) {
       setError("Failed to fetch itinerary. Try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveItineraryToBackend = async () => {
+    if (!itinerary) return;
+  
+    try {
+      const response = await axios.post(`${API_URL}/save-itinerary`, {
+        email: email,
+        ...itinerary, 
+      });
+  
+      console.log("Itinerary saved:", response.data);
+      alert("Itinerary saved successfully!");
+    } catch (err) {
+      console.error("Failed to save itinerary:", err);
+      alert("Failed to save itinerary. Please try again.");
     }
   };
 
@@ -394,6 +416,14 @@ const CopilotItinerary: React.FC = () => {
             <h1 className="text-4xl font-bold">{itinerary.name}</h1>
             <p className="text-lg mt-2">{itinerary.description}</p>
           </div>
+
+          {/* Save Itinerary Button */}
+            <button
+              onClick={saveItineraryToBackend}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg -mt-16 mb-8 transition"
+            >
+              Save Itinerary
+            </button>
 
           {/* DnDContext wraps the entire itinerary of days */}
           <DndContext

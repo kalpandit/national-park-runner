@@ -1,107 +1,229 @@
-from itinerary_object import itinerary_object
+import os
 from pymongo import MongoClient
-from user import user
-from yelp import model
+from pymongo import MongoClient
+from pymongo.server_api import ServerApi
+import json
+from bson import ObjectId 
+
+uri = os.getenv("MONGO_URI")
+client = MongoClient(uri, tls=True, server_api=ServerApi('1'))
+
+db = client['npr_db']
+mc = db['model_collection']
 
 
 class itinerary:
-
-    def __init__(self, difficulty, cost, location):
-
-        # A list of itinerary_objects
+    def __init__(self, difficulty, cost, location, emailaddress):
+        # A list of itinerary objects
         self.itinerary_objects_morning = []
-        self.alternative_options_morning= []
+        self.alternative_options_morning = []
 
         self.itinerary_objects_noon = []
-        self.alternative_options_noon= []
+        self.alternative_options_noon = []
 
         self.itinerary_objects_night = []
-        self.alternative_options_night= []
+        self.alternative_options_night = []
 
-        self.difficulty=difficulty
-        self.cost=cost
+        self.difficulty = difficulty
+        self.cost = cost
+        self.location = location
+        self.emailaddress = emailaddress
 
-        self.objs_used = {}
-        self.food = True
+        self.objects_used = {}
+
+    def serialize_object(self, obj):
+        """ Recursively converts ObjectId and Cursor objects into JSON serializable formats. """
+        if isinstance(obj, dict):
+            return {key: self.serialize_object(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self.serialize_object(item) for item in obj]
+        elif isinstance(obj, ObjectId):
+            return str(obj)  # Convert ObjectId to string
+        else:
+            return obj
+
+    def convert_to_json(self):
+        itinerary_dict = {
+            "itinerary_objects_morning": self.serialize_object(self.itinerary_objects_morning),
+            "alternative_options_morning": self.serialize_object(self.alternative_options_morning),
+            "itinerary_objects_noon": self.serialize_object(self.itinerary_objects_noon),
+            "alternative_options_noon": self.serialize_object(self.alternative_options_noon),
+            "itinerary_objects_night": self.serialize_object(self.itinerary_objects_night),
+            "alternative_options_night": self.serialize_object(self.alternative_options_night),
+            "difficulty": self.difficulty,
+            "cost": self.cost,
+            "location": self.location,
+            "emailaddress": self.emailaddress
+        }
+
+        itinerary_dict = self.serialize_object(itinerary_dict)
+        
+        return itinerary_dict
     
     def populate_itinerary(self):
-        #new_itinerary = []
+        itinerary_objects = {
+            "Morning": self.itinerary_objects_morning,
+            "Noon": self.itinerary_objects_noon,
+            "Night": self.itinerary_objects_night
+        }
+        alternative_options = {
+            "Morning": self.alternative_options_morning,
+            "Noon": self.alternative_options_noon,
+            "Night": self.alternative_options_night
+        }
+        query = {"difficulty": self.difficulty, "park": self.location, "length": "Entire"}
+        top_activities = list(mc.find(query).sort("Rating", -1).limit(2))
+        if top_activities:
+            self.itinerary_objects_morning.extend([top_activities[0]])
+            self.itinerary_objects_noon.extend([top_activities[0]])
+            self.itinerary_objects_night.extend([top_activities[0]])
+            self.alternative_options_morning.extend([top_activities[1]])
+            self.alternative_options_noon.extend([top_activities[1]])
+            self.alternative_options_night.extend([top_activities[1]])
+            return
         
+        time_periods = ["Morning", "Noon", "Night"]
+        for idx, time_of_day in enumerate(time_periods):
+            query = {"difficulty": self.difficulty, "park": self.location, "time_of_day": time_of_day}
+            top_activities = list(mc.find(query).sort("Rating", -1))
+            for activity in top_activities:
+                if len(itinerary_objects[time_of_day]) < 2:
+                    itinerary_objects[time_of_day].append(activity)
+                else:
+                    alternative_options[time_of_day].append(activity)
 
-        self.objs_used.clear()
-        #inserted = False
+        difficulty_map = {
+            "Hard": "Medium",
+            "Medium": "Easy",
+            "Easy": "gone"
+        }
 
-        client = MongoClient("mongodb://localhost:27017/")  # check if this is correct
-        db = client["npr_db"]  # Replace with your database name
-        collection = db["model_collection"]  # Replace with your collection name
+        for idx, time_of_day in enumerate(time_periods):
+            end = False
+            curr_diff = self.difficulty
+            while curr_diff in difficulty_map: 
+                query = {"difficulty": curr_diff, "park": self.location, "time_of_day": "All"}
+                remaining = 2 - len(itinerary_objects[time_of_day])
+                if remaining <= 0:
+                    break
+                top_activities = list(mc.find(query).sort("Rating", -1))
+                for activity in top_activities:
+                    if activity['name'] in self.objects_used:
+                        continue
+                    if len(itinerary_objects[time_of_day]) < 2:
+                        itinerary_objects[time_of_day].append(activity)
+                    else:
+                        end = True
+                        break
+                    self.objects_used[activity['name']] = True
+                curr_diff = difficulty_map[curr_diff]
+                if end:
+                    break
 
-        
+        for idx, time_of_day in enumerate(time_periods):
+            end = False
+            curr_diff = self.difficulty
+            while curr_diff in difficulty_map: 
+                query = {"difficulty": curr_diff, "park": self.location, "time_of_day": "All"}
+                remaining = 2 - len(alternative_options[time_of_day])
+                if remaining <= 0:
+                    continue
+                top_activities = list(mc.find(query).sort("Rating", -1))
+                for activity in top_activities:
+                    if activity['name'] in self.objects_used:
+                        continue
+                    if len(alternative_options[time_of_day]) < 2:
+                        alternative_options[time_of_day].append(activity)
+                    else:
+                        end = True
+                        break
+                    self.objects_used[activity['name']] = True
+                if end:
+                    break
+                curr_diff = difficulty_map[curr_diff]
 
+    # def populate_itinerary(self):
+    #     """Populates the itinerary based on user difficulty preference and rating."""
+    #     time_periods = ["Morning", "Noon", "Night"]
+    #     itinerary_objects = {
+    #         "Morning": self.itinerary_objects_morning,
+    #         "Noon": self.itinerary_objects_noon,
+    #         "Night": self.itinerary_objects_night
+    #     }
+    #     alternative_options = {
+    #         "Morning": self.alternative_options_morning,
+    #         "Noon": self.alternative_options_noon,
+    #         "Night": self.alternative_options_night
+    #     }
 
-        #find out how to querey mangodb to find the most popular activities based on the user --> if user likes medium difficulty automatically populate
-        #the mornign afternoon and night with 5 star medium difficulty ratings and if there aren't enough, then go down to easy rating
+    #     for idx, time_of_day in enumerate(time_periods):
+    #         # ✅ Fix: Query where time_of_day is either "All" or the specific period
+    #         limit_amt = idx + 1
+    #         query = {"difficulty": self.difficulty, "park": self.location, "$or": [{"time_of_day": "All"}, {"time_of_day": time_of_day}]}
+            
+    #         top_activities = list(mc.find(query).sort("Rating", -1).limit(limit_amt * 2))
+    #         res = []
+    #         finished = False
+    #         finished_Two = False
+    #         if time_of_day == "Morning":
+    #             for activity in top_activities:
+    #                 if activity['length'] == "Entire":
+    #                     itinerary_objects['Morning'].extend([activity])
+    #                     itinerary_objects['Noon'].extend([activity])
+    #                     itinerary_objects['Night'].extend([activity])
+    #                     finished = True
+    #                     res.append(activity)
+    #                     break
+    #                 elif float(activity['length']) >= 6:
+    #                     top_activities = [activity]
+    #                     finished_two = True
+    #                     break
+    #         if not(finished):
+    #             for activity in top_activities:
+    #                 if activity['name'] in self.objects_used:
+    #                     continue
+    #                 else:
+    #                     self.objects_used[activity['name']] = True
+    #                     res.append(activity)
+    #             if time_of_day == "Morning":
+    #                 print(res)
+    #             itinerary_objects[time_of_day].extend(res)
 
-        # time_filter = {} if self. == "all" else {"time_of_day": preferred_time}
+    #         # ✅ Handle Fallback to Lower Difficulty if Needed
+    #         if len(res) < 2 and (not(finished) or not(finished_two)):
+    #             difficulty_fallback = {"Hard": "Medium", "Medium": "Easy"}
+    #             if self.difficulty in difficulty_fallback:
+    #                 fallback_query = {
+    #                     "difficulty": difficulty_fallback[self.difficulty], "park": self.location,
+    #                     "$or": [{"time_of_day": "All"}, {"time_of_day": time_of_day}]
+    #                 }
+    #                 remaining_activities = list(
+    #                     mc.find(fallback_query).sort("Rating", -1).limit(7 - len(top_activities))
+    #                 )
+    #                 for activity in remaining_activities:
+    #                     if activity['name'] in self.objects_used:
+    #                         continue
+    #                     else:
+    #                         self.objects_used[activity['name']] = True
+    #                         res.append(activity)
+    #                     if len(res) >= 2:
+    #                         break
+    #                 itinerary_objects[time_of_day].extend(res)
+                    
+    #         # ✅ Get Alternative Options (Skipping the Top 3)
+    #         if not(finished):
+    #             alternative_activities = list(mc.find(query).sort("Rating", -1).skip(2))
+    #             alternative_options[time_of_day].extend(alternative_activities)
+    #         else:
+    #             alternative_activities = list(mc.find(query).sort("Rating", -1).skip(1).limit(2))
+    #             alternative_options["Noon"].extend(alternative_activities)
+    #             alternative_options["Night"].extend(alternative_activities)
+    #             alternative_options["Morning"].extend(alternative_activities)
 
-        #MORNING
-        query = {"difficulty": self.difficulty , "time_of_day": "Morning" }  # Filter by difficulty and time of day
-        top_activities = collection.find(query).sort("Rating", -1).limit(3)  # Sort by Rating (descending)
-        top_3_morning=list(top_activities)
-        self.itinerary_objects_morning.append(top_3_morning)
-        if len(top_3_morning)<3 and self.difficulty=="Hard":
-            query = {"difficulty": "Medium" , "time_of_day": "Morning" }  # Filter by difficulty and time of day
-            remaining = 3-len(top_3_morning)
-            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
-            self.itinerary_objects_morning.append(list(top_activities))
-        if len(top_3_morning)<3 and self.difficulty=="Medium":
-            query = {"difficulty": "Easy" , "time_of_day": "Morning" }  # Filter by difficulty and time of day
-            remaining = 3-len(top_3_morning)
-            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
-            self.itinerary_objects_morning.append(list(top_activities))
+    #         if finished:
+    #             break
 
-        top_activities = collection.find(query).sort("Rating", -1) # Sort by Rating (descending)
-        top_activities=top_activities[3:]
-        self.alternative_options_morning.append(top_activities)
-
-        #NOON
-        query = {"difficulty": self.difficulty , "time_of_day": "Noon" }  # Filter by difficulty and time of day
-        top_activities = collection.find(query).sort("Rating", -1).limit(3)  # Sort by Rating (descending)
-        top_3_noon=list(top_activities)
-        self.itinerary_objects_noon.append(top_3_noon)
-        
-        if len(top_3_noon)<3 and self.difficulty=="Hard":
-            query = {"difficulty": "Medium" , "time_of_day": "Noon" }  # Filter by difficulty and time of day
-            remaining = 3-len(top_3_noon)
-            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
-            self.itinerary_objects_noon.append(list(top_activities))
-        if len(top_3_noon)<3 and self.difficulty=="Medium":
-            query = {"difficulty": "Easy" , "time_of_day": "Noon" }  # Filter by difficulty and time of day
-            remaining = 3-len(top_3_noon)
-            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
-            self.itinerary_objects_noon.append(list(top_activities))
-        
-        top_activities = collection.find(query).sort("Rating", -1) # Sort by Rating (descending)
-        top_activities=top_activities[3:]
-        self.alternative_options_noon.append(top_activities)
-
-        #NIGHT
-        query = {"difficulty": self.difficulty , "time_of_day": "Night" }  # Filter by difficulty and time of day
-        top_activities = collection.find(query).sort("Rating", -1).limit(3)  # Sort by Rating (descending)
-        top_3_night=list(top_activities)
-        self.itinerary_objects_night.append(top_3_night)
-        if len(top_3_night)<3 and self.difficulty=="Hard":
-            query = {"difficulty": "Medium" , "time_of_day": "Noon" }  # Filter by difficulty and time of day
-            remaining = 3-len(top_3_night)
-            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
-            self.itinerary_objects_night.append(list(top_activities))
-        if len(top_3_night)<3 and self.difficulty=="Medium":
-            query = {"difficulty": "Easy" , "time_of_day": "Noon" }  # Filter by difficulty and time of day
-            remaining = 3-len(top_3_night)
-            top_activities = collection.find(query).sort("Rating", -1).limit(remaining)  # Sort by Rating (descending)
-            self.itinerary_objects_night.append(list(top_activities))
-        top_activities = collection.find(query).sort("Rating", -1) # Sort by Rating (descending)
-        top_activities=top_activities[3:]
-        self.alternative_options_night.append(top_activities)
+    #     print("Itinerary successfully populated!")
         
 
         # for obj in self.itinerary_objects:
@@ -159,20 +281,11 @@ class itinerary:
         return False
 
 
-def create_itinerary(user_: user):
+# def create_itinerary(difficulty, cost):
 
-    itinerary_ = itinerary()
-    cost = user_.tags.get("cost", None)
-    difficulty = user_.tags.get("difficulty", "Hard")
+#     itinerary_ = itinerary(difficulty, cost, location=None)
+#     itinerary_.populate_itinerary()
+#     return None
 
-    # Select 
-    options = "MONGO DB QUERY"  # sort by rating
-    activity_options = "MONGO DB QUERY" # sort by rating, include difficulty --> decrease the rating 
-    food_options = "MONGO DB QUERY" # potentially set up YELP API???
-
-    for activity in activity_options:
-        itinerary_.add_object()
-
-    return itinerary_
-
+# create_itinerary("Hard", 2)
 

@@ -2,9 +2,10 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS  # Import Flask-CORS
 import os
 import google.generativeai as genai
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import json
 import requests
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,7 +17,7 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, origins="http://localhost:5173")  # Enable CORS for all routes
 
 def fetch_unsplash_image(query):
     """Fetch a relevant Unsplash image URL based on the query."""
@@ -56,14 +57,14 @@ def generate_itinerary():
       - Difficulty
       - Time (duration in hours) -- ensure this is included
       - Accessible (true/false)
-      - Education (short learning aspect)
+      - Description (short learning aspect)
       - Rating (out of 5)
     - Include food recommendations please, even if the user doesn't say it. INCLUDE FOOD for 5 reward points; include lunch and dinner where applicable.
 
     Activity:
   accessible: boolean - must be lowercase;
   difficulty: string;
-  education: string;
+  description: string;
   name: string;
   time_of_day: string;
   rating: number;
@@ -134,14 +135,14 @@ def propose_change():
       - Education (short learning aspect) -- must be included
       - Rating (out of 5)
       - Accessible (true/false)
-      - Education (short learning aspect)
+      - Description (short learning aspect)
       - Rating (out of 5)
     - Include food recommendations if applicable.
 
     Activity:
   accessible: boolean;
   difficulty: string;
-  education: string;
+  description: string;
   name: string;
   time_of_day: string;
   rating: number;
@@ -192,7 +193,9 @@ def expert_chatbot():
     prompt = f"""
     You're a travel agent who is friendly and responds to questions. 
 
-    You're knowledgeable about Yellowstone and Yosemite, as well as national parks in general (you MUST be able to talk about OTHER national parks). Here's some expert advice:
+    You're knowledgeable about national parks in general (you MUST be able to talk about OTHER national parks). Here's some expert advice that is not all inclusive, but ONLY for Yosemite and Yellowstone:
+
+    You are responsible for finding out info about other parks.
 
     Yellowstone National Park (Established in 1872 – The First National Park!)
 Supervolcano Alert! Yellowstone sits on top of a massive underground volcano, and its last major eruption was over 640,000 years ago.
@@ -259,7 +262,7 @@ Camp Smart – Set up tents away from water sources and food storage to avoid at
 The user's question is: {prompt}
 Previous messages: {prev_messages}
 
-Generate a response. 
+Generate a response. Write it in Markdown, including with newlines where necessary.
 
     """
 
