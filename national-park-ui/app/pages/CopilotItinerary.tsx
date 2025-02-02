@@ -17,6 +17,7 @@ import {
 } from "@heroicons/react/24/solid";
 import Chatbot from "./Chatbot";
 import { useLocation } from "react-router-dom";
+import Yelp from "~/components/Yelp";
 
 const API_URL = "http://127.0.0.1:6464";
 
@@ -479,6 +480,7 @@ const CopilotItinerary = () => {
               </div>
             ))}
           </DndContext>
+          <Yelp location={itinerary.name}></Yelp>
         </div>
       )}
       <Chatbot></Chatbot>

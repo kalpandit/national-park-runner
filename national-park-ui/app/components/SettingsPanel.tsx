@@ -45,6 +45,7 @@ function SettingsContent() {
         cost: (user.unsafeMetadata as { cost?: string }).cost || "$$",
         accessibility: (user.unsafeMetadata as { accessibility?: string }).accessibility || "Doesn't Need Accessible",
       });
+      console.log(preferences)
     }
   }, [user]);
 

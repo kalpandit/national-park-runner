@@ -4,6 +4,7 @@ import axios from "axios";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import SortableItem from "~/components/draggableItem";
+import Yelp from "~/components/Yelp";
 
 interface Itinerary {
     _id: string;
@@ -27,6 +28,7 @@ export default function SingleItinerary() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
+
 
     useEffect(() => {
         const fetchItinerary = async () => {
@@ -135,7 +137,7 @@ export default function SingleItinerary() {
                 onDragEnd={handleDragEnd}
                 onReplaceActivity={handleReplaceActivity}
             />
-
+            <Yelp location={itinerary.name || itinerary.location || "Yellowstone National Park"}></Yelp>
             {/* Save Button */}
             <button
                 className={`mt-6 w-full px-4 py-3 ${saving ? "bg-gray-400" : "bg-green-600"} text-white rounded-lg shadow-md hover:bg-green-700 transition duration-200`}
