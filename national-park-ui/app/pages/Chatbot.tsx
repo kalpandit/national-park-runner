@@ -85,7 +85,7 @@ const Chatbot: React.FC = () => {
               className="bg-green-500 text-white px-4 py-2 rounded-r-md hover:bg-green-600 transition"
               disabled={loading}
             >
-              {loading ? "..." : "Send"}
+              {loading ? "..." : "Send"} 
             </button>
           </div>
         </div>
