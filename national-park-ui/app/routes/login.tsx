@@ -15,7 +15,7 @@ const Login = () => {
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Login</h2>
           <SignIn
             path="/login"
-            afterSignInUrl="/home"
+            afterSignInUrl="/profile"
             appearance={{
               variables: {
                 colorPrimary: '#1a73e8',

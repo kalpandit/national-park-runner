@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { DndContext, closestCorners, type DragEndEvent } from "@dnd-kit/core";
+import { useUser } from "@clerk/clerk-react";
 import {
   arrayMove,
   SortableContext,
@@ -196,6 +197,8 @@ const CopilotItinerary: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showItinerary, setShowItinerary] = useState(false);
+  const { user } = useUser();
+  const email = user?.primaryEmailAddress?.emailAddress
 
   const [alternatives, setAlternatives] = useState<{
     [key: string]: Activity[];
@@ -306,8 +309,8 @@ const CopilotItinerary: React.FC = () => {
   
     try {
       const response = await axios.post(`${API_URL}/save-itinerary`, {
-        email: "user@example.com", // TODO: Replace with actual logged-in user email
-        ...itinerary, // Send the itinerary data
+        email: email,
+        ...itinerary, 
       });
   
       console.log("Itinerary saved:", response.data);

@@ -116,7 +116,8 @@ def create_itin():
         if not emailaddress:
             return jsonify({"error": "Missing required field: email"}), 400
 
-        cost = int(request.args.get("cost", 4))
+        ## TODO clerk 
+        cost = len(request.args.get("cost"))
         difficulty = request.args.get("difficulty", "Hard")
         location = request.args.get("location", "Yosemite National Park")
 
@@ -241,26 +242,46 @@ def update_itinerary():
 def save_itinerary():
     try:
         data = request.json  # Frontend itinerary payload
+        print(data)
         email = data.get("email")  # Ensure user association
-        
+
         if not email:
             return jsonify({"error": "Missing email address"}), 400
         
-        # Convert frontend itinerary format to backend format
-        itinerary_objects = []
+        # Convert frontend itinerary format to backend format with time categories
+        itinerary_objects = {
+            "morning": [],
+            "noon": [],
+            "night": []
+        }
+        alternative_options = {
+            "morning": [],
+            "noon": [],
+            "night": []
+        }
+
         for day in data["days"]:
             for activity in day["activities"]:
-                itinerary_objects.append({
+                activity_data = {
                     "name": activity["name"],
                     "difficulty": activity["difficulty"],
                     "type": activity["type"],
-                    "time_of_day": activity["time_of_day"],
+                    "time_of_day": activity["time_of_day"].lower(),
                     "description": activity.get("description", ""), 
                     "education": activity.get("education", ""), 
                     "rating": activity.get("rating", 0),
                     "time": activity.get("time", 0),
                     "accessible": activity.get("accessible", False)
-                })
+                }
+
+                # Categorizing activities
+                time_of_day = activity["time_of_day"].lower()
+                if time_of_day in ["morning"]:
+                    itinerary_objects["morning"].append(activity_data)
+                elif time_of_day in ["noon", "afternoon"]:
+                    itinerary_objects["noon"].append(activity_data)
+                elif time_of_day in ["night", "evening"]:
+                    itinerary_objects["night"].append(activity_data)
 
         # Prepare MongoDB entry
         itinerary_entry = {
@@ -268,10 +289,17 @@ def save_itinerary():
             "name": data.get("name", "Unnamed Itinerary"),
             "description": data.get("description", ""),  # General itinerary description
             "image_url": data.get("image", {}).get("image_url", ""),
-            "itinerary_objects": itinerary_objects,
-            "alternative_options": [],  # Placeholder for future alternatives
+            "itinerary_objects_morning": itinerary_objects["morning"],
+            "alternative_options_morning": alternative_options["morning"],
+            "itinerary_objects_noon": itinerary_objects["noon"],
+            "alternative_options_noon": alternative_options["noon"],
+            "itinerary_objects_night": itinerary_objects["night"],
+            "alternative_options_night": alternative_options["night"],
             "objs_used": {},
-            "food": False  # Default food option
+            "food": False,  # Default food option
+            "difficulty": data.get("difficulty", "Medium"),
+            "cost": data.get("cost", 0),
+            "location": data.get("location", "")
         }
 
         # Save to MongoDB
@@ -292,8 +320,7 @@ def save_itinerary():
 @app.route("/get-itinerary", methods=['GET'])
 def get_itinerary():
     try:
-        data = request.json
-        email = data.get('email')  # Extract email
+        email = request.args.get('email')
 
         if not email:
             return jsonify({"error": "Missing emailaddress"}), 400

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
+import axios from "axios";
 
 export default function SettingsPanel() {
   return (
@@ -21,7 +22,7 @@ function SettingsContent() {
     name: "",
     description: "",
     difficulty: "Moderate",
-    cost: "$$",
+    cost: '$$',
     accessibility: "Doesn't Need Accessible",
   });
   const [showPopup, setShowPopup] = useState({ account: false, preferences: false });
@@ -81,6 +82,29 @@ function SettingsContent() {
           accessibility: preferences.accessibility,
         },
       });
+
+      try {
+        const response = await axios.get('http://127.0.0.1:6464/create-itinerary', {
+          params: {
+            email: user?.primaryEmailAddress?.emailAddress,
+            cost: preferences.cost,
+            difficulty: preferences.difficulty,
+            location: "Yellowstone National Park"
+          }
+        });
+        const res2 = await axios.get('http://127.0.0.1:6464/create-itinerary', {
+          params: {
+            email: user?.primaryEmailAddress?.emailAddress,
+            cost: preferences.cost,
+            difficulty: preferences.difficulty,
+            location: "Yosemite National Park"
+          }
+        });
+        console.log("Success.")
+      }
+      catch(error) {
+        console.error("ERROR!", error);
+      }
 
       setShowPopup({ ...showPopup, preferences: true });
       setTimeout(() => setShowPopup({ ...showPopup, preferences: false }), 2000);
@@ -175,10 +199,10 @@ function SettingsContent() {
               onChange={(e) => handlePreferenceChange("cost", e.target.value)}
               className="w-full p-2 mt-1 border rounded-md bg-gray-100 dark:bg-gray-700"
             >
-              <option>$ (Cheap)</option>
-              <option>$$ (Moderate)</option>
-              <option>$$$ (High)</option>
-              <option>$$$$ (Ultra High-End)</option>
+              <option>$</option>
+              <option>$$</option>
+              <option>$$$</option>
+              <option>$$$$</option>
             </select>
 
             {/* Accessibility Selection */}
