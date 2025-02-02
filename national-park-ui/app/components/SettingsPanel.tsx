@@ -1,28 +1,92 @@
-import { useState } from "react";
-import { Dialog } from "@headlessui/react";
+import { useState, useEffect } from "react";
+import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 
 export default function SettingsPanel() {
+  return (
+    <div>
+      <SignedIn>
+        <SettingsContent />
+      </SignedIn>
+      <SignedOut>
+        <p>Please sign in to access settings.</p>
+      </SignedOut>
+    </div>
+  );
+}
+
+function SettingsContent() {
+  const { user } = useUser();
   const [selectedTab, setSelectedTab] = useState("account");
   const [preferences, setPreferences] = useState({
+    name: "",
+    description: "",
     difficulty: "Moderate",
     cost: "$$",
     accessibility: "Doesn't Need Accessible",
   });
-  const [showPopup, setShowPopup] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState({ account: false, preferences: false });
 
-  const handlePreferenceChange = (field, value) => {
+  type UserMetadata = {
+    name?: string;
+    description?: string;
+    difficulty?: string;
+    cost?: string;
+    accessibility?: string;
+  };
+
+  // Load user preferences from Clerk
+  useEffect(() => {
+    if (user) {
+      setPreferences({
+        name: (user.unsafeMetadata as { name?: string }).name || "", // Use Clerk's first and last name
+        description: (user.unsafeMetadata as { description?: string }).description || "", // Use stored metadata
+        difficulty: (user.unsafeMetadata as { difficulty?: string }).difficulty || "Moderate",
+        cost: (user.unsafeMetadata as { cost?: string }).cost || "$$",
+        accessibility: (user.unsafeMetadata as { accessibility?: string }).accessibility || "Doesn't Need Accessible",
+      });
+    }
+  }, [user]);
+
+  // Handle preference change
+  const handlePreferenceChange = (field: string, value: string) => {
     setPreferences({ ...preferences, [field]: value });
   };
 
-  const handleSavePreferences = () => {
-    setShowPopup(true);
-    setTimeout(() => setShowPopup(false), 2000);
+  // Save account info to Clerk
+  const handleSaveAccountInfo = async () => {
+    if (!user) return;
+    try {
+      await user.update({
+        unsafeMetadata: {
+          name: preferences.name, // Save name
+          description: preferences.description, // Save description
+        },
+      });
+
+      setShowPopup({ ...showPopup, account: true });
+      setTimeout(() => setShowPopup({ ...showPopup, account: false }), 2000);
+    } catch (error) {
+      console.error("Error saving account info:", error);
+    }
   };
 
-  const deleteAccount = () => {
-    console.log("Account deleted!"); // Replace with actual API call
-    setIsConfirmOpen(false);
+  // Save preferences to Clerk
+  const handleSavePreferences = async () => {
+    if (!user) return;
+    try {
+      await user.update({
+        unsafeMetadata: {
+          difficulty: preferences.difficulty,
+          cost: preferences.cost,
+          accessibility: preferences.accessibility,
+        },
+      });
+
+      setShowPopup({ ...showPopup, preferences: true });
+      setTimeout(() => setShowPopup({ ...showPopup, preferences: false }), 2000);
+    } catch (error) {
+      console.error("Error saving preferences:", error);
+    }
   };
 
   return (
@@ -31,7 +95,7 @@ export default function SettingsPanel() {
 
       {/* Tab Navigation */}
       <div className="flex border-b border-gray-300 dark:border-gray-700">
-        {["account", "preferences", "security"].map((tab) => (
+        {["account", "preferences"].map((tab) => (
           <button
             key={tab}
             onClick={() => setSelectedTab(tab)}
@@ -48,27 +112,46 @@ export default function SettingsPanel() {
 
       {/* Tab Content */}
       <div className="mt-4">
-        {selectedTab === "account" && <p>Manage your account details here.</p>}
-
-        {/* Security Tab */}
-        {selectedTab === "security" && (
+        {selectedTab === "account" && (
           <div>
-            <h3 className="text-lg font-semibold mb-2">Security Settings</h3>
-            <p className="text-gray-600 dark:text-gray-300">
-              Update your security preferences here.
-            </p>
+            <h3 className="text-lg font-semibold mb-2">Account Information</h3>
 
-            {/* Delete Account Button */}
+            {/* Name Input */}
+            <label className="block mt-4 font-medium">Name</label>
+            <input
+              type="text"
+              value={preferences.name}
+              onChange={(e) => handlePreferenceChange("name", e.target.value)}
+              className="w-full p-2 mt-1 border rounded-md bg-gray-100 dark:bg-gray-700"
+              placeholder="Enter your name"
+            />
+
+            {/* Description Input */}
+            <label className="block mt-4 font-medium">Description</label>
+            <textarea
+              value={preferences.description}
+              onChange={(e) => handlePreferenceChange("description", e.target.value)}
+              className="w-full p-2 mt-1 border rounded-md bg-gray-100 dark:bg-gray-700"
+              placeholder="Describe yourself"
+            />
+
+            {/* Save Button for Account Info */}
             <button
-              className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-md transition"
-              onClick={() => setIsConfirmOpen(true)}
+              onClick={handleSaveAccountInfo}
+              className="mt-6 w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md transition"
             >
-              Delete Account
+              Save Account Info
             </button>
+
+            {/* Popup Notification for Account Info Saved */}
+            {showPopup.account && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-sm px-4 py-2 rounded shadow-lg">
+                Account Info Saved!
+              </div>
+            )}
           </div>
         )}
 
-        {/* Preferences Tab (UNCHANGED) */}
         {selectedTab === "preferences" && (
           <div>
             <h3 className="text-lg font-semibold mb-2">Edit Your Preferences</h3>
@@ -109,50 +192,23 @@ export default function SettingsPanel() {
               <option>Doesn't Need Accessible</option>
             </select>
 
-            {/* Save Button */}
+            {/* Save Button for Preferences */}
             <button
               onClick={handleSavePreferences}
               className="mt-6 w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md transition"
             >
               Save Preferences
             </button>
+
+            {/* Popup Notification for Preferences Saved */}
+            {showPopup.preferences && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-sm px-4 py-2 rounded shadow-lg">
+                Preferences Saved!
+              </div>
+            )}
           </div>
         )}
       </div>
-
-      {/* Popup Notification for Preferences Saved */}
-      {showPopup && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-sm px-4 py-2 rounded shadow-lg">
-          Preferences Saved!
-        </div>
-      )}
-
-      {/* Confirmation Modal for Delete Account */}
-      <Dialog open={isConfirmOpen} onClose={() => setIsConfirmOpen(false)} className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="fixed inset-0 bg-black bg-opacity-50" />
-
-        <Dialog.Panel className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg max-w-sm mx-auto">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Are you sure?</h3>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
-            Deleting your account is permanent and cannot be undone.
-          </p>
-
-          <div className="mt-4 flex justify-end space-x-3">
-            <button
-              className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-400"
-              onClick={() => setIsConfirmOpen(false)}
-            >
-              Cancel
-            </button>
-            <button
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              onClick={deleteAccount}
-            >
-              Confirm Delete
-            </button>
-          </div>
-        </Dialog.Panel>
-      </Dialog>
     </div>
   );
 }
