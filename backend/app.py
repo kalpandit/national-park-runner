@@ -143,6 +143,25 @@ def create_itin():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/get-single-itinerary", methods=['GET'])
+def get_single_itin():
+    try:
+        _id = request.args.get("_id")
+        # emailaddress = request.args.get("email")
+        
+        itin = ic.find_one({"_id": _id})
+
+        serialized_result = serialize_object(itin)
+
+        return jsonify({
+            "itinerary": serialized_result
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 @app.route("/update-preferences", methods=['POST'])
 def update_preferences():
     try:
