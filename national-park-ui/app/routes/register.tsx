@@ -17,7 +17,7 @@ const Register = () => {
             path="/register"
             routing="path"
             signInUrl="/login"
-            afterSignUpUrl="/metadata"
+            afterSignUpUrl="/profile"
           />
         </div>
       </main>

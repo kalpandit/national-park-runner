@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { 
-  DndContext, 
-  closestCorners,
-  type DragEndEvent, 
-} from "@dnd-kit/core";
+import { DndContext, closestCorners, type DragEndEvent } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   verticalListSortingStrategy,
-  useSortable
+  useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -18,6 +14,7 @@ import {
   ClockIcon,
   ArrowLeftIcon,
 } from "@heroicons/react/24/solid";
+import Chatbot from "./Chatbot";
 
 const API_URL = "http://127.0.0.1:5000";
 
@@ -43,26 +40,22 @@ type ItineraryData = {
   name: string;
 };
 
-interface SortableItemProps {
-  activity: Activity;
-  dayIndex: number;
-  activityIndex: number;
-  fetchAlternatives: (activityName: string, dayIdx: number, actIdx: number) => Promise<void>;
-  alternatives: Activity[] | undefined;
-  loadingAlternatives: boolean;
-}
 
 interface SortableItemProps {
   activity: Activity;
   dayIndex: number;
   activityIndex: number;
-  fetchAlternatives: (activityName: string, dayIdx: number, actIdx: number) => Promise<void>;
+  fetchAlternatives: (
+    activityName: string,
+    dayIdx: number,
+    actIdx: number
+  ) => Promise<void>;
   alternatives: Activity[] | undefined;
   loadingAlternatives: boolean;
-  setItinerary: React.Dispatch<React.SetStateAction<ItineraryData | null>>; // ✅ Add setItinerary
+  setItinerary: React.Dispatch<React.SetStateAction<ItineraryData | null>>;
+  showAlternatives: boolean; // ✅ Add this
+  toggleShowAlternatives: (dayIndex: number, activityIndex: number) => void; // ✅ Add this
 }
-
-// -- SortableItem Component --
 const SortableItem: React.FC<SortableItemProps> = ({
   activity,
   dayIndex,
@@ -71,17 +64,25 @@ const SortableItem: React.FC<SortableItemProps> = ({
   alternatives,
   loadingAlternatives,
   setItinerary,
+  showAlternatives,
+  toggleShowAlternatives,
 }) => {
-  const { 
+  const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: `${dayIndex}-${activityIndex}`, 
-    animateLayoutChanges: () => false 
+    data: {
+      type: "activity",
+      dayIndex,
+      activityIndex,
+    },
+    animateLayoutChanges: () => false,
+    disabled: showAlternatives, // ✅ Disable dragging if alternatives are expanded
   });
 
   const style: React.CSSProperties = {
@@ -91,11 +92,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
     opacity: isDragging ? 0.8 : 1,
   };
 
-  const activityKey = `${dayIndex}-${activityIndex}`;
-  const [showAlternatives, setShowAlternatives] = useState(true);
-
   const acceptAlternative = (alternative: Activity) => {
-    // Call parent function to replace activity with alternative
     setItinerary((prevItinerary) => {
       if (!prevItinerary) return prevItinerary;
       const newItinerary = { ...prevItinerary };
@@ -103,82 +100,87 @@ const SortableItem: React.FC<SortableItemProps> = ({
       return newItinerary;
     });
 
-    // Hide alternatives after selection
-    setShowAlternatives(false);
+    toggleShowAlternatives(dayIndex, activityIndex); // Hide alternatives after selection
   };
 
   return (
     <div ref={setNodeRef} style={style} className="bg-white p-6 rounded-lg shadow-lg">
-      {/* Drag Handle */}
-      <div 
-        {...attributes} 
-        {...listeners} 
-        className="cursor-grab bg-gray-200 rounded p-2 inline-block mb-2"
-        title="Drag this handle to reorder"
+      <div
+        {...attributes}
+        {...(showAlternatives ? {} : listeners)} // ✅ Disable dragging if alternatives are expanded
+        className={`cursor-grab bg-gray-200 rounded p-2 inline-block mb-2 ${
+          showAlternatives ? "opacity-50 cursor-not-allowed" : ""
+        }`}
       >
-        <span className="text-gray-600">:: drag ::</span>
+        <span className="text-gray-600">{showAlternatives ? "Pick an alternative or hide alternatives before dragging" : ":: drag ::"}</span>
       </div>
 
-      {/* Activity Information */}
       <h3 className="text-xl font-semibold">{activity.name}</h3>
       <p className="text-gray-600">{activity.education}</p>
 
       <div className="flex items-center mt-2 text-gray-600">
-        <span className="capitalize">
-          {activity.type} - {activity.difficulty}
-        </span>
+        <span className="capitalize">{activity.type} {activity.difficulty && `- ${activity.difficulty}`}</span>
         <span className="ml-3 flex items-center">
           <ClockIcon className="h-5 w-5 mr-1 text-gray-500" />
-          Suggested: {activity.time_of_day} - {activity.time} hrs
+          Suggested: {activity.time_of_day} {activity.time && `- ${activity.time} hrs`}
         </span>
         {activity.accessible ? (
-          <span className="ml-0 flex items-center">
-            <CheckCircleIcon className="h-5 w-5 text-green-500 ml-3 mr-2" />
+          <span className="ml-3 flex items-center">
+            <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
             Accessible
           </span>
         ) : (
-          <span className="ml-0 flex items-center">
-            <XCircleIcon className="h-5 w-5 text-red-500 ml-3 mr-2" />
+          <span className="ml-3 flex items-center">
+            <XCircleIcon className="h-5 w-5 text-red-500 mr-2" />
             Not Accessible
           </span>
         )}
       </div>
 
-      {/* Fetch Alternatives Button */}
       <div className="mt-3">
         <button
           className="text-sm bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-          onClick={() => fetchAlternatives(activity.name, dayIndex, activityIndex)}
+          onClick={() => toggleShowAlternatives(dayIndex, activityIndex)}
         >
-          {loadingAlternatives ? "Loading..." : "Propose Alternatives"}
+          {loadingAlternatives ? "Loading..." : showAlternatives ? "Hide Alternatives" : "Propose Alternatives"}
         </button>
       </div>
 
-      {/* Display Alternatives with Accept Button */}
-      {alternatives && alternatives.length > 0 && showAlternatives && (
+      {showAlternatives && alternatives && alternatives.length > 0 && (
         <div className="mt-2 p-2 border border-gray-200 rounded">
-          <div className="flex justify-between items-center">
-            <h4 className="font-bold">Alternatives:</h4>
-            <button
-              className="text-xs text-gray-500 hover:text-gray-700"
-              onClick={() => setShowAlternatives(false)}
-            >
-              Hide Alternatives
-            </button>
-          </div>
+          <h4 className="font-bold">Alternatives:</h4>
           <ul className="list-disc ml-4">
             {alternatives.map((alt, idx) => (
-              <li key={idx} className="mt-1 flex justify-between items-center">
-                <div>
-                  <strong>{alt.name}</strong> - {alt.type} ({alt.difficulty})
+              <div key={idx} className="p-4 rounded-lg bg-gray-50">
+                <h1 className="text-lg">{alt.name}</h1>
+                <p className="text-md">{alt.education}</p>
+                <div className="flex items-center mt-2 text-gray-600">
+                  <span className="capitalize">
+                    {alt.type} {alt.difficulty && `- ${alt.difficulty}`}
+                  </span>
+                  <span className="ml-3 flex items-center">
+                    <ClockIcon className="h-5 w-5 mr-1 text-gray-500" />
+                    Suggested: {alt.time_of_day} {alt.time && `- ${alt.time} hrs`}
+                  </span>
+                  {alt.accessible ? (
+                    <span className="ml-3 flex items-center">
+                      <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
+                      Accessible
+                    </span>
+                  ) : (
+                    <span className="ml-3 flex items-center">
+                      <XCircleIcon className="h-5 w-5 text-red-500 mr-2" />
+                      Not Accessible
+                    </span>
+                  )}
                 </div>
                 <button
-                  className="text-xs bg-green-500 text-white py-1 px-2 rounded ml-2 hover:bg-green-600"
+                  className="text-sm bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 mt-2"
                   onClick={() => acceptAlternative(alt)}
                 >
                   Accept Activity
                 </button>
-              </li>
+              </div>
             ))}
           </ul>
         </div>
@@ -187,7 +189,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
   );
 };
 
-// -- Main Itinerary Component --
+// -- SortableItem Component --
 const CopilotItinerary: React.FC = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [itinerary, setItinerary] = useState<ItineraryData | null>(null);
@@ -195,28 +197,86 @@ const CopilotItinerary: React.FC = () => {
   const [error, setError] = useState("");
   const [showItinerary, setShowItinerary] = useState(false);
 
-  const [alternatives, setAlternatives] = useState<{ [key: string]: Activity[] }>({});
-  const [loadingAlternatives, setLoadingAlternatives] = useState<{ [key: string]: boolean }>({});
+  const [alternatives, setAlternatives] = useState<{
+    [key: string]: Activity[];
+  }>({});
+  const [loadingAlternatives, setLoadingAlternatives] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  const [showAlternatives, setShowAlternatives] = useState<{
+    [key: string]: boolean;
+  }>({});
+  
+  // Toggle function to set visibility per activity
+  const toggleShowAlternatives = (dayIndex: number, activityIndex: number) => {
+    const activityKey = `${dayIndex}-${activityIndex}`;
+    setShowAlternatives((prev) => ({
+      ...prev,
+      [activityKey]: !prev[activityKey],
+    }));
+  
+    // Fetch alternatives only if opening the menu
+    if (!showAlternatives[activityKey]) {
+      fetchAlternatives(itinerary!.days[dayIndex].activities[activityIndex].name, dayIndex, activityIndex);
+    }
+  };
+  
 
   // Fetch alternative activities for an activity
-  const fetchAlternatives = async (activityName: string, dayIndex: number, activityIndex: number) => {
+  const fetchAlternatives = async (
+    activityName: string,
+    dayIndex: number,
+    activityIndex: number
+  ) => {
     const activityKey = `${dayIndex}-${activityIndex}`;
+  
+    // Prevent refetching if alternatives already exist
+    if (alternatives[activityKey]) return;
+  
     setLoadingAlternatives((prev) => ({ ...prev, [activityKey]: true }));
-
-    try {
-      const response = await axios.post(`${API_URL}/propose_change`, {
-        proposed_change: activityName,
-        info_request: itinerary,
-      });
-
+  
+    let attempts = 0;
+    let success = false;
+    let lastError = "";
+  
+    while (attempts < 2 && !success) {
+      try {
+        const response = await axios.post(`${API_URL}/propose_change`, {
+          proposed_change: activityName,
+          info_request: itinerary,
+        });
+  
+        const fetchedAlternatives = response.data.days[0].activities || [];
+  
+        setAlternatives((prev) => ({
+          ...prev,
+          [activityKey]: fetchedAlternatives,
+        }));
+  
+        success = true;
+      } catch (err) {
+        console.error(`Attempt ${attempts + 1} failed:`, err);
+        lastError = "Failed to fetch alternatives. Please try again.";
+        attempts += 1;
+      }
+    }
+  
+    setLoadingAlternatives((prev) => ({ ...prev, [activityKey]: false }));
+  
+    // Show a retry button if both attempts fail
+    if (!success) {
       setAlternatives((prev) => ({
         ...prev,
-        [activityKey]: response.data.days[0].activities || [],
+        [activityKey]: [],
       }));
-    } catch (err) {
-      console.error("Failed to fetch alternatives:", err);
-    } finally {
-      setLoadingAlternatives((prev) => ({ ...prev, [activityKey]: false }));
+  
+      setShowAlternatives((prev) => ({
+        ...prev,
+        [activityKey]: false, // Ensure UI hides failed fetch result
+      }));
+  
+      alert(lastError); // Notify the user
     }
   };
 
@@ -242,23 +302,30 @@ const CopilotItinerary: React.FC = () => {
   // Handle drag end
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-  
+
     if (!active?.id || !over?.id || !itinerary) return; // Ensure IDs exist
-  
+
     const activeId = active.id.toString();
     const overId = over.id.toString();
-  
+
     if (!activeId.includes("-") || !overId.includes("-")) return; // Ensure correct ID format
-  
-    const [activeDayIndex, activeActivityIndex] = activeId.split("-").map(Number);
+
+    const [activeDayIndex, activeActivityIndex] = activeId
+      .split("-")
+      .map(Number);
     const [overDayIndex, overActivityIndex] = overId.split("-").map(Number);
-  
-    if (isNaN(activeDayIndex) || isNaN(activeActivityIndex) || isNaN(overDayIndex) || isNaN(overActivityIndex)) {
+
+    if (
+      isNaN(activeDayIndex) ||
+      isNaN(activeActivityIndex) ||
+      isNaN(overDayIndex) ||
+      isNaN(overActivityIndex)
+    ) {
       return;
     }
-  
+
     const newItinerary = { ...itinerary };
-  
+
     if (activeDayIndex === overDayIndex) {
       // Same day reorder
       newItinerary.days[activeDayIndex].activities = arrayMove(
@@ -268,13 +335,18 @@ const CopilotItinerary: React.FC = () => {
       );
     } else {
       // Move activity to a different day
-      const [movedActivity] = newItinerary.days[activeDayIndex].activities.splice(activeActivityIndex, 1);
-      newItinerary.days[overDayIndex].activities.splice(overActivityIndex, 0, movedActivity);
+      const [movedActivity] = newItinerary.days[
+        activeDayIndex
+      ].activities.splice(activeActivityIndex, 1);
+      newItinerary.days[overDayIndex].activities.splice(
+        overActivityIndex,
+        0,
+        movedActivity
+      );
     }
-  
+
     setItinerary(newItinerary);
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -316,8 +388,7 @@ const CopilotItinerary: React.FC = () => {
           <div
             className="relative bg-cover bg-center h-[400px] flex items-center justify-center text-white rounded-lg shadow-lg"
             style={{ backgroundImage: `url(${itinerary.image.image_url})` }}
-          >
-          </div>
+          ></div>
 
           <div className="my-6">
             <h1 className="text-4xl font-bold">{itinerary.name}</h1>
@@ -325,10 +396,15 @@ const CopilotItinerary: React.FC = () => {
           </div>
 
           {/* DnDContext wraps the entire itinerary of days */}
-          <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+          <DndContext
+            collisionDetection={closestCorners}
+            onDragEnd={handleDragEnd}
+          >
             {itinerary.days.map((day, dayIndex) => (
               <div key={dayIndex} className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Day {dayIndex + 1}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  Day {dayIndex + 1}
+                </h2>
 
                 <SortableContext
                   items={day.activities.map((_, i) => `${dayIndex}-${i}`)}
@@ -339,17 +415,19 @@ const CopilotItinerary: React.FC = () => {
                       const activityKey = `${dayIndex}-${activityIndex}`;
                       return (
                         <SortableItem
-                          key={activityKey}
-                          activity={activity}
-                          dayIndex={dayIndex}
-                          activityIndex={activityIndex}
-                          fetchAlternatives={fetchAlternatives}
-                          alternatives={alternatives[activityKey]}
-                          loadingAlternatives={!!loadingAlternatives[activityKey]}
-                          setItinerary={setItinerary}
-                        />
-                      );
-                    })}
+                        key={activityKey}
+                        activity={activity}
+                        dayIndex={dayIndex}
+                        activityIndex={activityIndex}
+                        fetchAlternatives={fetchAlternatives}
+                        alternatives={alternatives[activityKey]}
+                        loadingAlternatives={!!loadingAlternatives[activityKey]}
+                        setItinerary={setItinerary}
+                        showAlternatives={!!showAlternatives[activityKey]}
+                        toggleShowAlternatives={toggleShowAlternatives}
+                      />
+
+                    )})}
                   </div>
                 </SortableContext>
               </div>
@@ -357,6 +435,7 @@ const CopilotItinerary: React.FC = () => {
           </DndContext>
         </div>
       )}
+      <Chatbot></Chatbot>
     </div>
   );
 };

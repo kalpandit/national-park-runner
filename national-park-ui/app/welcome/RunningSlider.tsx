@@ -113,6 +113,7 @@ const RunningSlider: React.FC = () => {
     <div className='hidden bg-red-800 bg-green-900 bg-green-800 bg-orange-600 bg-green 800'></div>
 
       {/* Walking Path Background - Creates an infinite loop effect */}
+      <div className='bg-green-900 bg-green-800 bg-orange-600 bg-red-800 bg-orange-700'></div>
       <div
         className="absolute bottom-0 w-full flex z-10"
         style={{
@@ -157,7 +158,7 @@ const RunningSlider: React.FC = () => {
 
             {/* Sliding Beacon Panel */}
             <div className="absolute top-32 left-1/2 transform -translate-x-1/2 animate-[bounce_15s_ease-in-out_infinite]">
-              <div className={`p-6 rounded-lg shadow-lg text-center ${image.color ? `bg-${image.color}` : "bg-gray-900"}`}>
+              <div className={`p-6 rounded-lg shadow-lg text-center bg-gray-900/75`}>
                 <h2 className="text-2xl text-white">{image.text}</h2>
                 <p className="text-md pt-3 text-white">{image.description}</p>
 

@@ -10,19 +10,18 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.22.10",
-    "@dnd-kit/accessibility": "^3.1.1",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
-    "@heroicons/react": "^2.2.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
     "@react-router/node": "^7.1.5",
     "@react-router/serve": "^7.1.5",
     "axios": "^1.7.9",
     "isbot": "^5.1.17",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-draggable": "^4.4.6",
-    "react-router": "^7.1.5"
+    "react-router": "^7.1.5",
     "react-router-dom": "^7.1.5"
   },
   "devDependencies": {
