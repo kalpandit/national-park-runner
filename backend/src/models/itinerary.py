@@ -59,10 +59,8 @@ class itinerary:
         itinerary_dict = self.serialize_object(itinerary_dict)
         
         return itinerary_dict
-
+    
     def populate_itinerary(self):
-        """Populates the itinerary based on user difficulty preference and rating."""
-        time_periods = ["Morning", "Noon", "Night"]
         itinerary_objects = {
             "Morning": self.itinerary_objects_morning,
             "Noon": self.itinerary_objects_noon,
@@ -73,68 +71,159 @@ class itinerary:
             "Noon": self.alternative_options_noon,
             "Night": self.alternative_options_night
         }
+        query = {"difficulty": self.difficulty, "park": self.location, "length": "Entire"}
+        top_activities = list(mc.find(query).sort("Rating", -1).limit(2))
+        if top_activities:
+            self.itinerary_objects_morning.extend([top_activities[0]])
+            self.itinerary_objects_noon.extend([top_activities[0]])
+            self.itinerary_objects_night.extend([top_activities[0]])
+            self.alternative_options_morning.extend([top_activities[1]])
+            self.alternative_options_noon.extend([top_activities[1]])
+            self.alternative_options_night.extend([top_activities[1]])
+            return
+        
+        time_periods = ["Morning", "Noon", "Night"]
+        for idx, time_of_day in enumerate(time_periods):
+            query = {"difficulty": self.difficulty, "park": self.location, "time_of_day": time_of_day}
+            top_activities = list(mc.find(query).sort("Rating", -1))
+            for activity in top_activities:
+                if len(itinerary_objects[time_of_day]) < 2:
+                    itinerary_objects[time_of_day].append(activity)
+                else:
+                    alternative_options[time_of_day].append(activity)
+
+        difficulty_map = {
+            "Hard": "Medium",
+            "Medium": "Easy",
+            "Easy": "gone"
+        }
 
         for idx, time_of_day in enumerate(time_periods):
-            # ✅ Fix: Query where time_of_day is either "All" or the specific period
-            limit_amt = idx + 1
-            query = {"difficulty": self.difficulty, "park": self.location, "$or": [{"time_of_day": "All"}, {"time_of_day": time_of_day}]}
-            
-            top_activities = list(mc.find(query).sort("Rating", -1).limit(limit_amt * 2))
-            res = []
-            finished = False
-            if time_of_day == "Morning":
-                for activity in top_activities:
-                    print(activity)
-                    if activity['length'] == "Entire":
-                        itinerary_objects['Morning'].extend([activity])
-                        itinerary_objects['Noon'].extend([activity])
-                        itinerary_objects['Night'].extend([activity])
-                        finished = True
-                        res.append(activity)
-                        break
-                    elif float(activity['length']) >= 6:
-                        itinerary_objects[time_of_day] = activity
-                        top_activities = activity
-
-
-
-            if not(finished):
+            end = False
+            curr_diff = self.difficulty
+            while curr_diff in difficulty_map: 
+                query = {"difficulty": curr_diff, "park": self.location, "time_of_day": "All"}
+                remaining = 2 - len(itinerary_objects[time_of_day])
+                if remaining <= 0:
+                    break
+                top_activities = list(mc.find(query).sort("Rating", -1))
                 for activity in top_activities:
                     if activity['name'] in self.objects_used:
                         continue
+                    if len(itinerary_objects[time_of_day]) < 2:
+                        itinerary_objects[time_of_day].append(activity)
                     else:
-                        self.objects_used[activity['name']] = True
-                        res.append(activity)
-                itinerary_objects[time_of_day].extend(res)
+                        end = True
+                        break
+                    self.objects_used[activity['name']] = True
+                curr_diff = difficulty_map[curr_diff]
+                if end:
+                    break
 
-            # ✅ Handle Fallback to Lower Difficulty if Needed
-            if len(res) < 2 and not(finished):
-                difficulty_fallback = {"Hard": "Medium", "Medium": "Easy"}
-                if self.difficulty in difficulty_fallback:
-                    fallback_query = {
-                        "difficulty": difficulty_fallback[self.difficulty], "park": self.location,
-                        "$or": [{"time_of_day": "All"}, {"time_of_day": time_of_day}]
-                    }
-                    remaining_activities = list(
-                        mc.find(fallback_query).sort("Rating", -1).limit(2 - len(top_activities))
-                    )
+        for idx, time_of_day in enumerate(time_periods):
+            end = False
+            curr_diff = self.difficulty
+            while curr_diff in difficulty_map: 
+                query = {"difficulty": curr_diff, "park": self.location, "time_of_day": "All"}
+                remaining = 2 - len(alternative_options[time_of_day])
+                if remaining <= 0:
+                    continue
+                top_activities = list(mc.find(query).sort("Rating", -1))
+                for activity in top_activities:
+                    if activity['name'] in self.objects_used:
+                        continue
+                    if len(alternative_options[time_of_day]) < 2:
+                        alternative_options[time_of_day].append(activity)
+                    else:
+                        end = True
+                        break
+                    self.objects_used[activity['name']] = True
+                if end:
+                    break
+                curr_diff = difficulty_map[curr_diff]
+
+    # def populate_itinerary(self):
+    #     """Populates the itinerary based on user difficulty preference and rating."""
+    #     time_periods = ["Morning", "Noon", "Night"]
+    #     itinerary_objects = {
+    #         "Morning": self.itinerary_objects_morning,
+    #         "Noon": self.itinerary_objects_noon,
+    #         "Night": self.itinerary_objects_night
+    #     }
+    #     alternative_options = {
+    #         "Morning": self.alternative_options_morning,
+    #         "Noon": self.alternative_options_noon,
+    #         "Night": self.alternative_options_night
+    #     }
+
+    #     for idx, time_of_day in enumerate(time_periods):
+    #         # ✅ Fix: Query where time_of_day is either "All" or the specific period
+    #         limit_amt = idx + 1
+    #         query = {"difficulty": self.difficulty, "park": self.location, "$or": [{"time_of_day": "All"}, {"time_of_day": time_of_day}]}
+            
+    #         top_activities = list(mc.find(query).sort("Rating", -1).limit(limit_amt * 2))
+    #         res = []
+    #         finished = False
+    #         finished_Two = False
+    #         if time_of_day == "Morning":
+    #             for activity in top_activities:
+    #                 if activity['length'] == "Entire":
+    #                     itinerary_objects['Morning'].extend([activity])
+    #                     itinerary_objects['Noon'].extend([activity])
+    #                     itinerary_objects['Night'].extend([activity])
+    #                     finished = True
+    #                     res.append(activity)
+    #                     break
+    #                 elif float(activity['length']) >= 6:
+    #                     top_activities = [activity]
+    #                     finished_two = True
+    #                     break
+    #         if not(finished):
+    #             for activity in top_activities:
+    #                 if activity['name'] in self.objects_used:
+    #                     continue
+    #                 else:
+    #                     self.objects_used[activity['name']] = True
+    #                     res.append(activity)
+    #             if time_of_day == "Morning":
+    #                 print(res)
+    #             itinerary_objects[time_of_day].extend(res)
+
+    #         # ✅ Handle Fallback to Lower Difficulty if Needed
+    #         if len(res) < 2 and (not(finished) or not(finished_two)):
+    #             difficulty_fallback = {"Hard": "Medium", "Medium": "Easy"}
+    #             if self.difficulty in difficulty_fallback:
+    #                 fallback_query = {
+    #                     "difficulty": difficulty_fallback[self.difficulty], "park": self.location,
+    #                     "$or": [{"time_of_day": "All"}, {"time_of_day": time_of_day}]
+    #                 }
+    #                 remaining_activities = list(
+    #                     mc.find(fallback_query).sort("Rating", -1).limit(7 - len(top_activities))
+    #                 )
+    #                 for activity in remaining_activities:
+    #                     if activity['name'] in self.objects_used:
+    #                         continue
+    #                     else:
+    #                         self.objects_used[activity['name']] = True
+    #                         res.append(activity)
+    #                     if len(res) >= 2:
+    #                         break
+    #                 itinerary_objects[time_of_day].extend(res)
                     
-                    itinerary_objects[time_of_day].extend(remaining_activities)
+    #         # ✅ Get Alternative Options (Skipping the Top 3)
+    #         if not(finished):
+    #             alternative_activities = list(mc.find(query).sort("Rating", -1).skip(2))
+    #             alternative_options[time_of_day].extend(alternative_activities)
+    #         else:
+    #             alternative_activities = list(mc.find(query).sort("Rating", -1).skip(1).limit(2))
+    #             alternative_options["Noon"].extend(alternative_activities)
+    #             alternative_options["Night"].extend(alternative_activities)
+    #             alternative_options["Morning"].extend(alternative_activities)
 
-            # ✅ Get Alternative Options (Skipping the Top 3)
-            if not(finished):
-                alternative_activities = list(mc.find(query).sort("Rating", -1).skip(2))
-                alternative_options[time_of_day].extend(alternative_activities)
-            else:
-                alternative_activities = list(mc.find(query).sort("Rating", -1).skip(1).limit(2))
-                alternative_options["Noon"].extend(alternative_activities)
-                alternative_options["Night"].extend(alternative_activities)
-                alternative_options["Morning"].extend(alternative_activities)
+    #         if finished:
+    #             break
 
-            if finished:
-                break
-
-        print("Itinerary successfully populated!")
+    #     print("Itinerary successfully populated!")
         
 
         # for obj in self.itinerary_objects:
