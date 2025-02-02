@@ -68,13 +68,13 @@ def hello_world():
                 "food":False
             }
         )
-    def create_itinerary(difficulty, cost):
+    # def create_itinerary(difficulty, cost):
 
-        itinerary_ = itinerary(difficulty, cost, location=None)
-        itinerary_.populate_itinerary()
-        return None
+    #     itinerary_ = itinerary(difficulty, cost, location=None)
+    #     itinerary_.populate_itinerary()
+    #     return None
 
-    create_itinerary("Hard", 2)
+    # create_itinerary("Hard", 2)
     # query = {"difficulty": "Medium" , "time_of_day": {"$in": ["Morning", "All"]} }  # Filter by difficulty and time of day
     # top_activities = mc.find(query).sort("Rating", -1).limit(3)
 
@@ -83,6 +83,24 @@ def hello_world():
     print("fuck")
 
     return "<p>Hello, World!</p>"
+
+@app.route("/create-itinerary", methods=['GET'])
+def create_itin():
+
+    data = request.json
+    emailaddress = data.get("email")
+    cost = data.get("cost", 4)
+    difficulty = data.get("difficulty", "Hard")
+    location = data.get("location", "Yosemite National Park")
+
+    itinerary_obj = itinerary(difficulty, cost, location, emailaddress)
+
+    itinerary_obj.populate_itinerary()
+
+    result = itinerary_obj.convert_to_json() # TODO: Finish
+
+    # TODO: Insert Itinerary into ic table, Add itinerary ID to users table
+    ic.insert_one(result)
 
 @app.route("/update-preferences", methods=['POST'])
 def update_preferences():
@@ -114,20 +132,19 @@ def update_preferences():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route("/users", method=['POST']) # needs a "insert_one db call"
+@app.route("/users", methods=['POST']) # needs a "insert_one db call"
 def add_user():
     data = request.json
-    newUser = data.get('user', {})
+    emailaddress = data.get("email")
 
-    client.npr_db.user_collection.insert_one(
+    uc.insert_one(
         {
-            "email": newUser['email'],
+            "email": emailaddress,
         }
     )
 
-    return
 
-@app.route("/yelp", method=['GET'])
+@app.route("/yelp", methods=['GET'])
 def get_yelp():
 
     data = request.json

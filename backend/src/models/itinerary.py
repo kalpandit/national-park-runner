@@ -16,7 +16,7 @@ mc = db['model_collection']
 
 class itinerary:
 
-    def __init__(self, difficulty, cost, location):
+    def __init__(self, difficulty, cost, location, emailaddress):
 
         # A list of itinerary_objects
         self.itinerary_objects_morning = []
@@ -30,8 +30,7 @@ class itinerary:
 
         self.difficulty=difficulty
         self.cost=cost
-
-        self.objs_used = {}
+        self.emailaddress=emailaddress
     
     def populate_itinerary(self):
         new_itinerary = []
@@ -166,11 +165,11 @@ class itinerary:
         return False
 
 
-def create_itinerary(difficulty, cost):
+# def create_itinerary(difficulty, cost):
 
-    itinerary_ = itinerary(difficulty, cost, location=None)
-    itinerary_.populate_itinerary()
-    return None
+#     itinerary_ = itinerary(difficulty, cost, location=None)
+#     itinerary_.populate_itinerary()
+#     return None
 
-create_itinerary("Hard", 2)
+# create_itinerary("Hard", 2)
 
