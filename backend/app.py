@@ -1,10 +1,11 @@
 import os
 import json
 import numpy as np
-from flask import Flask
+from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from src.database.migrate import convert_json
+from yelp import model
 
 
 uri = os.getenv("MONGO_URI")
@@ -24,6 +25,28 @@ db = client['npr_db']
 uc = db['user_collection']
 mc = db['model_collection']
 ic = db['itinerary_collection']
+
+
+@app.route("/yelp")
+def get_food_recommendations():
+    breakfast=[]
+    lunch=[]
+    dinner=[]
+    location = request.args.get("location")
+    cost = request.args.get("cost")
+
+    breakfast.append(list(model.search_businesses("Breakfast", location,  max_price=cost, limit=5)))
+    lunch.append(list(model.search_businesses("Lunch", location,  max_price=cost, limit=5)))
+    dinner.append(list(model.search_businesses("Dinner", location,  max_price=cost, limit=5)))
+
+    return jsonify({
+    'breakfast': breakfast,
+    'lunch': lunch,
+    'dinner': dinner
+    })
+
+
+
 
 @app.route("/")
 def hello_world():
