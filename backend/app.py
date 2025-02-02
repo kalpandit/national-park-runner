@@ -122,6 +122,7 @@ def create_itin():
 
         # Create itinerary object
         itinerary_obj = itinerary(difficulty, cost, location, emailaddress)
+        print("hello")
         itinerary_obj.populate_itinerary()
 
         # ✅ Fix: Ensure result_dict is a dictionary (not a string)
