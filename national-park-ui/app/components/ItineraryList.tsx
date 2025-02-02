@@ -6,8 +6,9 @@ import { useUser } from "@clerk/clerk-react";
 interface Itinerary {
   _id: string;
   name: string;
-  image_url?: string; // ✅ Optional to handle missing images
-  location?: string;  // ✅ Optional location field
+  image_url?: string;
+  location?: string;
+  generative_data?: any; // ✅ Added generative-data field
 }
 
 export default function ItineraryList() {
@@ -30,7 +31,8 @@ export default function ItineraryList() {
             email: user.primaryEmailAddress.emailAddress,
           },
         });
-        console.log(response.data)
+
+        console.log(response.data);
         if (response.data.itineraries) {
           setItineraries(response.data.itineraries as Itinerary[]);
         } else {
@@ -58,18 +60,28 @@ export default function ItineraryList() {
       ) : itineraries.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {itineraries.map((itinerary) => {
-            let imageUrl = itinerary.image_url || 
-            (itinerary.location?.toLowerCase().includes("yellowstone") ? "yellowstone.webp" : 
-            itinerary.location?.toLowerCase().includes("yosemite") ? "yosemite.jpg" : 
-            null);
+            let imageUrl =
+              itinerary.image_url ||
+              (itinerary.location?.toLowerCase().includes("yellowstone")
+                ? "yellowstone.webp"
+                : itinerary.location?.toLowerCase().includes("yosemite")
+                ? "yosemite.jpg"
+                : null);
+
             const backgroundStyle = imageUrl
               ? { backgroundImage: `url('${imageUrl}')` }
-              : { backgroundColor: "#008000" }; // Green background if no image
+              : { backgroundColor: "#008000" };
 
             return (
               <div
                 key={itinerary._id}
-                onClick={() => navigate(`/single/${itinerary._id}`)}
+                onClick={() =>
+                  itinerary.generative_data
+                    ? navigate("/copilot-itinerary", {
+                        state: { initialData: itinerary.generative_data },
+                      })
+                    : navigate(`/single/${itinerary._id}`)
+                }
                 className="cursor-pointer relative rounded-lg shadow-lg overflow-hidden h-40 bg-cover bg-center group bg-black"
                 style={backgroundStyle}
               >
@@ -79,7 +91,7 @@ export default function ItineraryList() {
                 {/* Title */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-white text-lg font-semibold drop-shadow-lg">
-                    {itinerary.location || itinerary.name} {/* Location takes priority */}
+                    {itinerary.location || itinerary.name}
                   </span>
                 </div>
               </div>

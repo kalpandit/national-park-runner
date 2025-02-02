@@ -2,6 +2,7 @@ import ProfileCard from "../components/ProfileCard";
 import ItineraryList from "../components/ItineraryList";
 import SettingsPanel from "../components/SettingsPanel";
 import bannerImage from "/public/national-park-banner.jpeg";
+import Chatbot from "./Chatbot";
 export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -24,6 +25,8 @@ export default function ProfilePage() {
         <ItineraryList />
         <SettingsPanel />
       </div>
+      <Chatbot></Chatbot>
+
     </div>
   );
 }

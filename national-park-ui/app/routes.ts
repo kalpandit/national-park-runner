@@ -9,4 +9,6 @@ export default [
   route("profile", "pages/ProfilePage.tsx"), // ✅ Added Profile Page
   route("chatbot", "pages/Chatbot.tsx"), // Itinerary Home route
   route("intro", "pages/IntroItinerary.tsx"), // Itinerary Home route
+  route("single/:id", "pages/SingleItinerary.tsx"), // Itinerary Home route
+
 ] satisfies RouteConfig;
