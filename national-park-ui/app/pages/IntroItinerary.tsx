@@ -20,6 +20,44 @@ const itineraries = [
 ];
 
 const IntroItinerary: React.FC = () => {
+    const handleViewItinerary = async (itineraryTitle: string) => {
+        const email = "jprasad1231@gmail.com"; // Replace this with the actual user email
+        const cost = 4; // Default cost (you can change this dynamically)
+        const difficulty = "Medium"; // Default difficulty
+
+        if (itineraryTitle == "Yellowstone National Park") {
+            itineraryTitle = "Yellowstone";
+        }
+    
+        // Construct the query parameters
+        const queryParams = new URLSearchParams({
+            email,
+            cost: cost.toString(), // Ensure cost is a string
+            difficulty,
+            location: itineraryTitle, // Pass itineraryTitle as the location
+        });
+    
+        try {
+            const response = await fetch(`http://127.0.0.1:6464/create-itinerary?${queryParams.toString()}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error("Failed to fetch itinerary");
+            }
+    
+            const data = await response.json();
+            console.log("Itinerary Response:", data);
+            alert(`Itinerary created successfully for ${itineraryTitle}!`);
+        } catch (error) {
+            console.error("Error fetching itinerary:", error);
+            alert("Failed to fetch itinerary. Please try again later.");
+        }
+    };
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Hero Section */}
@@ -49,12 +87,10 @@ const IntroItinerary: React.FC = () => {
               <div className="p-6">
                 <h3 className="text-2xl font-semibold">{itinerary.title}</h3>
                 <p className="text-gray-600 mt-2">{itinerary.description}</p>
-                <a
-                  href={itinerary.link}
+                <button
+                  onClick={() => handleViewItinerary(itinerary.title)}
                   className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
-                >
-                  View Itinerary
-                </a>
+                >View Itinerary</button>
               </div>
             </div>
           ))}

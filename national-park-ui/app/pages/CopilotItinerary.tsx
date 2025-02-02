@@ -16,7 +16,7 @@ import {
 } from "@heroicons/react/24/solid";
 import Chatbot from "./Chatbot";
 
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "http://127.0.0.1:6464";
 
 type Activity = {
   accessible: boolean;
@@ -290,12 +290,31 @@ const CopilotItinerary: React.FC = () => {
       const response = await axios.post(`${API_URL}/generate_itinerary`, {
         info_request: userPrompt,
       });
+      console.log("correct?");
+      console.log(response.data);
       setItinerary(response.data);
       setTimeout(() => setShowItinerary(true), 500);
     } catch (err) {
       setError("Failed to fetch itinerary. Try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveItineraryToBackend = async () => {
+    if (!itinerary) return;
+  
+    try {
+      const response = await axios.post(`${API_URL}/save-itinerary`, {
+        email: "user@example.com", // TODO: Replace with actual logged-in user email
+        ...itinerary, // Send the itinerary data
+      });
+  
+      console.log("Itinerary saved:", response.data);
+      alert("Itinerary saved successfully!");
+    } catch (err) {
+      console.error("Failed to save itinerary:", err);
+      alert("Failed to save itinerary. Please try again.");
     }
   };
 
@@ -394,6 +413,14 @@ const CopilotItinerary: React.FC = () => {
             <h1 className="text-4xl font-bold">{itinerary.name}</h1>
             <p className="text-lg mt-2">{itinerary.description}</p>
           </div>
+
+          {/* Save Itinerary Button */}
+            <button
+              onClick={saveItineraryToBackend}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg mt-4 transition"
+            >
+              Save Itinerary
+            </button>
 
           {/* DnDContext wraps the entire itinerary of days */}
           <DndContext

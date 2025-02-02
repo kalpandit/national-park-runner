@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS  # Import Flask-CORS
 import os
 import google.generativeai as genai
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import json
 import requests
 
@@ -17,7 +17,7 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 UNSPLASH_ACCESS_KEY = os.getenv("UNSPLASH_ACCESS_KEY")
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, origins="http://localhost:5173")  # Enable CORS for all routes
 
 def fetch_unsplash_image(query):
     """Fetch a relevant Unsplash image URL based on the query."""
