@@ -29,6 +29,8 @@ class itinerary:
         self.location = location
         self.emailaddress = emailaddress
 
+        self.objects_used = {}
+
     def serialize_object(self, obj):
         """ Recursively converts ObjectId and Cursor objects into JSON serializable formats. """
         if isinstance(obj, dict):
@@ -72,29 +74,65 @@ class itinerary:
             "Night": self.alternative_options_night
         }
 
-        for time_of_day in time_periods:
+        for idx, time_of_day in enumerate(time_periods):
             # ✅ Fix: Query where time_of_day is either "All" or the specific period
-            query = {"difficulty": self.difficulty, "$or": [{"time_of_day": "All"}, {"time_of_day": time_of_day}]}
+            limit_amt = idx + 1
+            query = {"difficulty": self.difficulty, "park": self.location, "$or": [{"time_of_day": "All"}, {"time_of_day": time_of_day}]}
             
-            top_activities = list(mc.find(query).sort("Rating", -1).limit(3))
-            itinerary_objects[time_of_day].extend(top_activities)
+            top_activities = list(mc.find(query).sort("Rating", -1).limit(limit_amt * 2))
+            res = []
+            finished = False
+            if time_of_day == "Morning":
+                for activity in top_activities:
+                    print(activity)
+                    if activity['length'] == "Entire":
+                        itinerary_objects['Morning'].extend([activity])
+                        itinerary_objects['Noon'].extend([activity])
+                        itinerary_objects['Night'].extend([activity])
+                        finished = True
+                        res.append(activity)
+                        break
+                    elif float(activity['length']) >= 6:
+                        itinerary_objects[time_of_day] = activity
+                        top_activities = activity
+
+
+
+            if not(finished):
+                for activity in top_activities:
+                    if activity['name'] in self.objects_used:
+                        continue
+                    else:
+                        self.objects_used[activity['name']] = True
+                        res.append(activity)
+                itinerary_objects[time_of_day].extend(res)
 
             # ✅ Handle Fallback to Lower Difficulty if Needed
-            if len(top_activities) < 3:
+            if len(res) < 2 and not(finished):
                 difficulty_fallback = {"Hard": "Medium", "Medium": "Easy"}
                 if self.difficulty in difficulty_fallback:
                     fallback_query = {
-                        "difficulty": difficulty_fallback[self.difficulty],
+                        "difficulty": difficulty_fallback[self.difficulty], "park": self.location,
                         "$or": [{"time_of_day": "All"}, {"time_of_day": time_of_day}]
                     }
                     remaining_activities = list(
-                        mc.find(fallback_query).sort("Rating", -1).limit(3 - len(top_activities))
+                        mc.find(fallback_query).sort("Rating", -1).limit(2 - len(top_activities))
                     )
+                    
                     itinerary_objects[time_of_day].extend(remaining_activities)
 
             # ✅ Get Alternative Options (Skipping the Top 3)
-            alternative_activities = list(mc.find(query).sort("Rating", -1).skip(3))
-            alternative_options[time_of_day].extend(alternative_activities)
+            if not(finished):
+                alternative_activities = list(mc.find(query).sort("Rating", -1).skip(2))
+                alternative_options[time_of_day].extend(alternative_activities)
+            else:
+                alternative_activities = list(mc.find(query).sort("Rating", -1).skip(1).limit(2))
+                alternative_options["Noon"].extend(alternative_activities)
+                alternative_options["Night"].extend(alternative_activities)
+                alternative_options["Morning"].extend(alternative_activities)
+
+            if finished:
+                break
 
         print("Itinerary successfully populated!")
         
