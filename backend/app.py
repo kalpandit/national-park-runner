@@ -84,23 +84,53 @@ def hello_world():
 
     return "<p>Hello, World!</p>"
 
+
+def serialize_object(obj):
+    """ Recursively converts ObjectId and other non-serializable types to JSON-safe formats. """
+    if isinstance(obj, dict):
+        return {key: serialize_object(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [serialize_object(item) for item in obj]
+    elif isinstance(obj, ObjectId):
+        return str(obj)  # Convert ObjectId to a string
+    else:
+        return obj  # Return as is
+
 @app.route("/create-itinerary", methods=['GET'])
 def create_itin():
+    try:
+        data = request.json
 
-    data = request.json
-    emailaddress = data.get("email")
-    cost = data.get("cost", 4)
-    difficulty = data.get("difficulty", "Hard")
-    location = data.get("location", "Yosemite National Park")
+        # Extracting required fields with defaults
+        emailaddress = data.get("email")
+        if not emailaddress:
+            return jsonify({"error": "Missing required field: email"}), 400
 
-    itinerary_obj = itinerary(difficulty, cost, location, emailaddress)
+        cost = data.get("cost", 4)
+        difficulty = data.get("difficulty", "Hard")
+        location = data.get("location", "Yosemite National Park")
 
-    itinerary_obj.populate_itinerary()
+        # Create itinerary object
+        itinerary_obj = itinerary(difficulty, cost, location, emailaddress)
+        itinerary_obj.populate_itinerary()
 
-    result = itinerary_obj.convert_to_json() # TODO: Finish
+        # ✅ Fix: Ensure result_dict is a dictionary (not a string)
+        result_dict = itinerary_obj.convert_to_json()  # Likely a JSON string
 
-    # TODO: Insert Itinerary into ic table, Add itinerary ID to users table
-    ic.insert_one(result)
+        print("Converted JSON back to dict:", result_dict)
+
+        # ✅ Insert into `ic` (itinerary collection)
+        insert_result = ic.insert_one(result_dict)
+        print("Inserted correctly")
+
+        # ✅ Convert inserted MongoDB document for safe JSON response
+        inserted_itinerary = ic.find_one({"_id": insert_result.inserted_id})
+        serialized_result = serialize_object(inserted_itinerary)
+
+        return jsonify({"message": "Itinerary created successfully", "itinerary": serialized_result}), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/update-preferences", methods=['POST'])
 def update_preferences():
@@ -201,29 +231,19 @@ def update_itinerary():
 def get_itinerary():
     try:
         data = request.json
-        email = data.get('emailaddress')  # Extract email
+        email = data.get('email')  # Extract email
 
         if not email:
             return jsonify({"error": "Missing emailaddress"}), 400
 
-        # Step 1: Query `uc` collection to get itinerary IDs
-        itinerary_cursor = uc.find({"emailaddress": email}, {"itinerary_id": 1, "_id": 0})
-        itinerary_ids = [entry["itinerary_id"] for entry in itinerary_cursor]
+        # ✅ Find all itineraries where emailaddress matches
+        itinerary_cursor = ic.find({"emailaddress": email})
 
-        if not itinerary_ids:
-            return jsonify({"message": "No itineraries found for this email"}), 404
-
-        # Step 2: Query `ic` collection using itinerary_ids (which are already strings)
-        itinerary_details_cursor = ic.find({"_id": {"$in": itinerary_ids}})
-
-        # Convert MongoDB cursor to list of dictionaries
-        itineraries = []
-        for itinerary in itinerary_details_cursor:
-            itinerary["_id"] = str(itinerary["_id"])  # Convert `_id` to string for consistency
-            itineraries.append(itinerary)
+        # ✅ Convert cursor to list and ensure ObjectIds are serializable
+        itineraries = [serialize_object(itinerary) for itinerary in itinerary_cursor]
 
         if not itineraries:
-            return jsonify({"message": "Itinerary IDs found, but no itinerary details available"}), 404
+            return jsonify({"message": "No itineraries found for this email"}), 404
 
         return jsonify({"itineraries": itineraries}), 200
 
