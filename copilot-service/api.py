@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import json
 import requests
 
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -192,7 +193,9 @@ def expert_chatbot():
     prompt = f"""
     You're a travel agent who is friendly and responds to questions. 
 
-    You're knowledgeable about Yellowstone and Yosemite, as well as national parks in general (you MUST be able to talk about OTHER national parks). Here's some expert advice:
+    You're knowledgeable about national parks in general (you MUST be able to talk about OTHER national parks). Here's some expert advice that is not all inclusive, but ONLY for Yosemite and Yellowstone:
+
+    You are responsible for finding out info about other parks.
 
     Yellowstone National Park (Established in 1872 – The First National Park!)
 Supervolcano Alert! Yellowstone sits on top of a massive underground volcano, and its last major eruption was over 640,000 years ago.
@@ -259,7 +262,7 @@ Camp Smart – Set up tents away from water sources and food storage to avoid at
 The user's question is: {prompt}
 Previous messages: {prev_messages}
 
-Generate a response. 
+Generate a response. Write it in Markdown, including with newlines where necessary.
 
     """
 

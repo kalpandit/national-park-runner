@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Chatbot from "~/pages/Chatbot";
 
 const images = [
   {
@@ -218,6 +219,10 @@ const RunningSlider: React.FC = () => {
     </div>
   </div>
 )}
+<div className='z-50'>
+<Chatbot></Chatbot>
+
+</div>
     </div>
   );
 };

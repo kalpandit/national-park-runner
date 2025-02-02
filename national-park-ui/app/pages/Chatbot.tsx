@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import Markdown from "react-markdown";
 
 interface Message {
   text: string;
@@ -62,7 +63,9 @@ const Chatbot: React.FC = () => {
                     msg.sender === "bot" ? "bg-gray-300 text-gray-800" : "bg-green-500 text-white"
                   }`}
                 >
-                  {msg.text}
+                  <Markdown>
+                    {msg.text.replace(/\n/g, "  \n")}
+                  </Markdown>
                 </div>
               </div>
             ))}
@@ -82,7 +85,7 @@ const Chatbot: React.FC = () => {
               className="bg-green-500 text-white px-4 py-2 rounded-r-md hover:bg-green-600 transition"
               disabled={loading}
             >
-              {loading ? "..." : "Send"}
+              {loading ? "..." : "Send"} 
             </button>
           </div>
         </div>
