@@ -44,6 +44,8 @@ def parse_json(response):
             "cost": biz.get("price", "N/A"),
             "food_type": ", ".join([cat["title"] for cat in biz.get("categories", [])]),  # Extract category names
             "city": biz.get("location", {}).get("city", "N/A"),
+            "longitude": biz.get("coordinates", {}).get("longitude", "N/A"),
+            "latitude": biz.get("coordinates", {}).get("latitude", "N/A"),
         })
 
     return parsed_data
