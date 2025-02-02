@@ -8,5 +8,6 @@ export default [
   route("register/*", "routes/register.tsx"),  // Handles `/register` and `/register/...`
   route("profile", "pages/ProfilePage.tsx"), // ✅ Added Profile Page
   route("chatbot", "pages/Chatbot.tsx"), // Itinerary Home route
+  route("maps", "pages/Maps.tsx"), // Itinerary Home route
   route("intro", "pages/IntroItinerary.tsx"), // Itinerary Home route
 ] satisfies RouteConfig;

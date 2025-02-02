@@ -420,7 +420,7 @@ const CopilotItinerary: React.FC = () => {
           {/* Save Itinerary Button */}
             <button
               onClick={saveItineraryToBackend}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg mt-4 transition"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg -mt-16 mb-8 transition"
             >
               Save Itinerary
             </button>

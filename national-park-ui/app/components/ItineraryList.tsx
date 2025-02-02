@@ -69,7 +69,7 @@ export default function ItineraryList() {
             return (
               <div
                 key={itinerary._id}
-                onClick={() => navigate(`/itinerary-home/${itinerary._id}`)}
+                onClick={() => navigate(`/single/${itinerary._id}`)}
                 className="cursor-pointer relative rounded-lg shadow-lg overflow-hidden h-40 bg-cover bg-center group bg-black"
                 style={backgroundStyle}
               >

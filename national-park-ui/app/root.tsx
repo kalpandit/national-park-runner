@@ -45,7 +45,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return (<ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+  return (
+  <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
       <Outlet />
     </ClerkProvider>)
 }
