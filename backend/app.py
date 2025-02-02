@@ -6,7 +6,7 @@ from pymongo.server_api import ServerApi
 from src.database.migrate import convert_json
 from src.models.itinerary import itinerary
 from flask import request, jsonify, Flask
-
+import src.yelp.model as yelp_model
 
 uri = os.getenv("MONGO_URI")
 
@@ -125,6 +125,52 @@ def add_user():
     )
 
     return
+
+@app.route("/yelp", method=['POST'])
+def get_yelp():
+
+    data = request.json
+    term = data.get('term', "Breakfast")
+    location = data.get('location', "Yosemite Valley")
+    max_cost = data.get('price', 4)
+    result = yelp_model.search_businesses(term, location, max_cost)
+    return result
+
+@app.route("/update-itinerary", methods=['POST'])
+def update_itinerary():
+    try:
+        data = request.json
+        
+        # Extract itinerary_id and updated fields
+        itinerary_id = data.get('itinerary_id')  # Ensure the key exists
+        update_fields = data
+
+        if not itinerary_id or not update_fields:
+            return jsonify({"error": "Missing itinerary_id or updates"}), 400
+
+        # Convert string ID to ObjectId
+        try:
+            itinerary_object_id = ObjectId(itinerary_id)
+        except Exception:
+            return jsonify({"error": "Invalid itinerary_id format"}), 400
+
+        # Update the itinerary
+        result = ic.update_one(
+            {"_id": itinerary_object_id},  # Find by itinerary_id
+            {"$set": update_fields}  # Update only provided fields
+        )
+
+        # Response based on update results
+        if result.matched_count == 0:
+            return jsonify({"message": "No itinerary found with this ID"}), 404
+        elif result.modified_count == 0:
+            return jsonify({"message": "No changes made"}), 200
+
+        return jsonify({"message": "Itinerary updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
