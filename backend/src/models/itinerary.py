@@ -23,23 +23,13 @@ class itinerary:
 
         self.objs_used = {}
         self.food = True
-
-        breakfast=[]
-        lunch=[]
-        dinner=[]
-
-        breakfast.append(list(model.search_businesses("Breakfast", location,  max_price=cost, limit=5)))
-        lunch.append(list(model.search_businesses("Lunch", location,  max_price=cost, limit=5)))
-        dinner.append(list(model.search_businesses("Dinner", location,  max_price=cost, limit=5)))
     
-    def populate_itinerary(self, itinerary_object_: itinerary_object):
-        new_itinerary = []
+    def populate_itinerary(self):
+        #new_itinerary = []
         
 
-
-
         self.objs_used.clear()
-        inserted = False
+        #inserted = False
 
         client = MongoClient("mongodb://localhost:27017/")  # check if this is correct
         db = client["npr_db"]  # Replace with your database name
