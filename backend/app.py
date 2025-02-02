@@ -5,12 +5,15 @@ from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from src.database.migrate import convert_json
-from yelp import model
+import src.yelp.model as model
+from flask_cors import CORS  # Import Flask-CORS
 
+app = Flask(__name__)
+CORS(app)
 
 uri = os.getenv("MONGO_URI")
 
-client = MongoClient(uri, tls=True, server_api=ServerApi('1'))
+'''client = MongoClient(uri, tls=True, server_api=ServerApi('1'))
 
 try:
     client.admin.command('ping')
@@ -19,15 +22,16 @@ except Exception as e:
     print(f"MongoDB connection failed: {e}")
 
 # Flask app
-app = Flask(__name__)
+
 db = client['npr_db']
 
 uc = db['user_collection']
 mc = db['model_collection']
 ic = db['itinerary_collection']
+'''
 
 
-@app.route("/yelp")
+@app.route("/yelp", methods=['GET'])
 def get_food_recommendations():
     breakfast=[]
     lunch=[]

@@ -1,12 +1,34 @@
 import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
-import React from "react";
-import { createRoot } from "react-dom/client";
+import React, {useState, useEffect} from "react";
+import axios from 'axios'
 
-export default function Maps() {
-    const yosemiteLocation = { lat: 37.8651, lng: -119.5383 }; // Yosemite National Park coordinates
+interface map_props{name:string}
+
+const Maps: React.FC<map_props> = ({name}) => {
+
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
+
+    const mapDetail = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json
+    ?fields=formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry
+    &input=${name}
+    &inputtype=textquery
+    &key=${import.meta.env.VITE_GOOGLE_MAPS_KEY}}`;
+
+    useEffect(() => {
+        axios.get(mapDetail)
+        .then(response => {
+            console.log(response.data)
+        })
+        .catch(err => {
+            console.error("Error", err);
+        })
+    }, []);
 
     return (
-        <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_KEY} onLoad={() => console.log("Maps API has loaded.")}>
+        <div>
+                    {/*
+            <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_KEY} onLoad={() => console.log("Maps API has loaded.")}>
             <Map 
                 center={yosemiteLocation} 
                 zoom={10} 
@@ -15,5 +37,10 @@ export default function Maps() {
                 <Marker position={yosemiteLocation} />
             </Map>
         </APIProvider>
+        */}
+            hello world!</div>
+
     );
 }
+
+export default Maps;

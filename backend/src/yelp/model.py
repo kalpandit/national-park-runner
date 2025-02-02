@@ -12,7 +12,7 @@ HEADERS = {
 }
 
 def search_businesses(term, location, max_price=4, limit=5):
-
+    max_price= int(max_price)
     max_price = min(max(1, max_price), 4)
     
     price_levels = ",".join(map(str, range(1, max_price + 1)))
