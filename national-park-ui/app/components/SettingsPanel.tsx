@@ -62,6 +62,9 @@ function SettingsContent() {
         unsafeMetadata: {
           name: preferences.name, // Save name
           description: preferences.description, // Save description
+          difficulty: preferences.difficulty,
+          cost: preferences.cost,
+          accessibility: preferences.accessibility
         },
       });
 
@@ -78,9 +81,11 @@ function SettingsContent() {
     try {
       await user.update({
         unsafeMetadata: {
+          name: preferences.name, // Save name
+          description: preferences.description, // Save description
           difficulty: preferences.difficulty,
           cost: preferences.cost,
-          accessibility: preferences.accessibility,
+          accessibility: preferences.accessibility
         },
       });
 

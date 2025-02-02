@@ -5,7 +5,7 @@ import {useNavigate} from 'react-router-dom';
 const images = [
   {
     src: "yosemite.jpg",
-    text: "Welcome to National Park Runner!",
+    text: "Welcome to ExploreEase!",
     description: `Welcome to the outdoors! We'll walk through the history of national parks, some key principles + things to know, and go through a few national parks! You'll have the chance to make your own itinerary, too.`,
     modalDescription: `National parks are preserved for their natural beauty and ecological importance. 
 They provide habitats for diverse species and offer visitors a chance to explore nature.
@@ -126,16 +126,18 @@ const RunningSlider: React.FC = () => {
         <div
           className="flex"
           style={{
-            width: "200%", // Make it twice as wide so it can loop
+            width: "400%", // Make it twice as wide so it can loop
             animation: isRunning ? "scrollPath 30s linear infinite" : "none",
             animationPlayState: isPaused ? "paused" : "running",
           }}
         >
           <img src="walk_path.png" className="w-full z-10" alt="Walking Path" />
-          <img src="walk_path.png" className="w-full" alt="Walking Path Duplicate" />
-          <img src="walk_path.png" className="w-full" alt="Walking Path Duplicate" />
-          <img src="walk_path.png" className="w-full" alt="Walking Path Duplicate" />
-          <img src="walk_path.png" className="w-full" alt="Walking Path Duplicate" />
+          <img src="walk_path.png" className="w-full z-10" alt="Walking Path Duplicate" />
+          <img src="walk_path.png" className="w-full z-10" alt="Walking Path Duplicate" />
+          <img src="walk_path.png" className="w-full z-10" alt="Walking Path Duplicate" />
+          <img src="walk_path.png" className="w-full z-10" alt="Walking Path Duplicate" />
+          <img src="walk_path.png" className="w-full z-10" alt="Walking Path Duplicate" />
+
 
         </div>
       </div>
@@ -159,7 +161,7 @@ const RunningSlider: React.FC = () => {
             <img src={image.src} className="w-full h-full object-cover z-0" alt={`Scene ${index + 1}`} />
 
             {/* Sliding Beacon Panel */}
-            <div className="absolute top-32 left-1/2 transform -translate-x-1/2 animate-[bounce_15s_ease-in-out_infinite]">
+            <div className="absolute top-64 left-1/2 transform -translate-x-1/2 animate-[bounce_15s_ease-in-out_infinite]">
               <div className={`p-6 rounded-lg shadow-lg text-center bg-gray-900/75`}>
                 <h2 className="text-2xl text-white">{image.text}</h2>
                 <p className="text-md pt-3 text-white">{image.description}</p>

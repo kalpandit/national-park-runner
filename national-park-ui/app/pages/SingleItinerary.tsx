@@ -5,6 +5,9 @@ import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import SortableItem from "~/components/draggableItem";
 import Yelp from "~/components/Yelp";
+import Weather from "~/components/Weather";
+import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import Chatbot from "./Chatbot";
 
 interface Itinerary {
     _id: string;
@@ -28,6 +31,7 @@ export default function SingleItinerary() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
+    const [img, setImg] = useState("");
 
 
     useEffect(() => {
@@ -36,6 +40,7 @@ export default function SingleItinerary() {
                 const response = await axios.get("http://127.0.0.1:6464/get-single-itinerary", {
                     params: { _id: id },
                 });
+                console.log(response.data)
                 setItinerary(response.data.itinerary);
             } catch (err) {
                 console.error("Error fetching itinerary:", err);
@@ -100,17 +105,37 @@ export default function SingleItinerary() {
     if (loading) return <p className="text-gray-500 text-center mt-6">Loading itinerary...</p>;
     if (error) return <p className="text-red-500 text-center mt-6">{error}</p>;
     if (!itinerary) return <p className="text-gray-500 text-center mt-6">Itinerary not found.</p>;
-    let imageUrl =
-    itinerary.image_url ||
-    (itinerary.location?.toLowerCase().includes("yellowstone") ? "yellowstone.webp" :
-    itinerary.location?.toLowerCase().includes("yosemite") ? "yosemite.jpg" :
-    null);
+    let imageUrl = itinerary.image_url;
   const backgroundStyle = imageUrl ? { backgroundImage: `url('${imageUrl}')` } : { backgroundColor: "#008000" };
     return (
         <div className="mt-6 p-6 bg-white rounded-lg shadow-lg w-full">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-                {itinerary.location || itinerary.name}
-            </h2>
+            <button
+            onClick={() => navigate('/profile')}
+            className="mb-4 ml-5 flex items-center text-gray-600 hover:text-gray-900 transition"
+          >
+            <ArrowLeftIcon className="h-5 w-5" />
+            <span className="ml-1">Back to Profile</span>
+          </button>
+            {itinerary.image_url && (
+                <div
+                className="relative bg-cover bg-800 bg-center h-[400px] flex items-center justify-center text-white rounded-lg shadow-lg"
+                style={backgroundStyle}
+              ></div>
+            )}
+<div className="w-full border-b pb-3 flex justify-between items-center">
+  <h2 className="text-4xl font-bold text-gray-900 pt-4 mb-3 ml-5 text-left">
+    {itinerary.location || itinerary.name}
+  </h2>
+  <p className="rounded-3xl mr-6 p-2 px-4 text-white font-bold bg-amber-500 w-fit">
+    Powered by ExploreEase expert recommendations!
+  </p>
+</div>
+
+
+
+            {(itinerary.location?.includes('Yosemite') || itinerary.location?.includes('Yellowstone') || itinerary.name?.includes('Yellowstone') || itinerary.name?.includes('Yosemite')) && (
+                <Weather location={itinerary.location || itinerary.name || ""}></Weather>
+            )}
 
             {/* Activity Sections */}
             <ActivitySection
@@ -140,7 +165,7 @@ export default function SingleItinerary() {
             <Yelp location={itinerary.name || itinerary.location || "Yellowstone National Park"}></Yelp>
             {/* Save Button */}
             <button
-                className={`mt-6 w-full px-4 py-3 ${saving ? "bg-gray-400" : "bg-green-600"} text-white rounded-lg shadow-md hover:bg-green-700 transition duration-200`}
+                className={`mt-6 w-full px-4 py-3 ${saving ? "bg-rose-300" : "bg-green-600"} text-white rounded-lg shadow-md hover:bg-green-700 transition duration-200`}
                 onClick={handleSaveItinerary}
                 disabled={saving}
             >
@@ -154,6 +179,7 @@ export default function SingleItinerary() {
             >
                 Back to Itineraries
             </button>
+            <Chatbot></Chatbot>
         </div>
     );
 }
@@ -196,7 +222,7 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({
                     <div className="space-y-3">
                         {alternativeActivities.map((altActivity) => (
                             <div key={altActivity._id} className="p-4 bg-gray-50 border rounded-lg flex items-center justify-between">
-                                <span className="text-gray-600">{altActivity.name} - {altActivity.length} hours ({altActivity.difficulty})</span>
+                                <span className="text-gray-600">{altActivity.name} - {altActivity.length} ({altActivity.difficulty})</span>
 
                                 <div className="flex items-center space-x-2">
                                     {/* Dropdown */}
@@ -213,7 +239,7 @@ const ActivitySection: React.FC<ActivitySectionProps> = ({
                                         <option value="" disabled>Select activity to replace</option>
                                         {activities.map((activity) => (
                                             <option key={activity._id} value={activity._id}>
-                                                {activity.name} - {activity.length} hours
+                                                {activity.name} - {activity.length}
                                             </option>
                                         ))}
                                     </select>

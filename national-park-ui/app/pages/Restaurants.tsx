@@ -16,7 +16,7 @@ export default function Restaurants() {
     const nationalPark = "Yosemite National Park"
 
     useEffect(() => {
-        axios.get('http://127.0.0.1:5000/yelp', {
+        axios.get('http://127.0.0.1:6464/yelp', {
             params: {
                 location: nationalPark,
                 cost: 3

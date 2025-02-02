@@ -29,7 +29,7 @@ const Chatbot: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/expert_chatbot", {
+      const response = await axios.post("http://127.0.0.1:6464/expert_chatbot", {
         message: input,
         previous_messages: JSON.stringify(messages),
       });
@@ -78,7 +78,7 @@ const Chatbot: React.FC = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Type a message..."
-              className="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none"
+              className="flex-grow px-4 py-2 border border-gray-300 text-black rounded-l-md focus:outline-none"
             />
             <button
               onClick={sendMessage}

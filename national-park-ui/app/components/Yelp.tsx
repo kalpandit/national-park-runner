@@ -48,10 +48,18 @@ const Yelp: React.FC<YelpProps> = ({ location }) => {
   useEffect(() => {
     const fetchData = async (mealType: string, setResults: React.Dispatch<React.SetStateAction<YelpResult[]>>) => {
       try {
+        if (location === 'Yellowstone') {
+          location = 'Yosemite National Park'
+        }
         const response = await axios.get("http://localhost:6464/yelp", {
           params: { term: mealType, location: location, price: preferences.cost },
         });
-        setResults(response.data);
+        if (Array.isArray(response.data)) {
+          setResults(response.data);
+        } else {
+          console.error(`Unexpected response format for ${mealType}:`, response.data);
+          setResults([]); 
+        }
       } catch (err) {
         console.error(`Error fetching ${mealType} data:`, err);
         setError(`Failed to load ${mealType} data.`);

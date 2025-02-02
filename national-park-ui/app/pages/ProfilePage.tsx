@@ -7,7 +7,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <div
-        className="relative h-48 w-full bg-cover bg-center"
+        className="relative h-48 w-full bg-cover bg-center shadow-xl shadow-gray-800"
         style={{ 
           backgroundImage: "url('yosemite.jpg')",
           backgroundSize: "cover",

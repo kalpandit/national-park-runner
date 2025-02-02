@@ -419,7 +419,7 @@ const CopilotItinerary = () => {
             className="mb-4 flex items-center text-gray-600 hover:text-gray-900 transition"
           >
             <ArrowLeftIcon className="h-5 w-5" />
-            <span className="ml-1">Back to Prompt</span>
+            <span className="ml-1">Back to Copilot</span>
           </button>
 
           <div

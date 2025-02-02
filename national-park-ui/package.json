@@ -20,6 +20,7 @@
     "@vis.gl/react-google-maps": "^1.5.1",
     "axios": "^1.7.9",
     "isbot": "^5.1.17",
+    "lucide-react": "^0.474.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^9.0.3",

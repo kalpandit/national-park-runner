@@ -9,9 +9,12 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <nav className="bg-gray-900 text-white p-4 fixed w-full top-0 left-0 flex justify-between items-center shadow-lg z-50">
+    <nav className="bg-green-900 text-white p-4 fixed w-full top-0 left-0 flex justify-between items-center shadow-lg z-50">
+      <div className='flex flex-row space-x-2 items-center'>
+      <img src="logo.png" className='w-16 h-16' />
       <div className="text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>
-        National Park Runner
+        ExploreEase
+      </div>
       </div>
       
       <div className="flex gap-6 items-center">
@@ -24,7 +27,7 @@ const Navbar: React.FC = () => {
         </button>
         <button
           onClick={() => navigate("/profile")}
-          className="px-4 py-2 bg-blue-800 rounded hover:bg-blue-700 transition"
+          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 transition"
         >
           Itineraries
         </button>

@@ -40,7 +40,7 @@ export default function ItineraryList() {
         }
       } catch (err) {
         console.error("Error fetching itineraries:", err);
-        setError("Failed to load itineraries");
+        setError("Set some preferences to get started.");
       } finally {
         setLoading(false);
       }

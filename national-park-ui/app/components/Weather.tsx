@@ -36,7 +36,7 @@ export default function Weather({ location }: Props) {
                 lon = -110.5612;
             }
 
-            const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${process.env.REACT_APP_OPENWEATHER_KEY}`;
+            const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${import.meta.env.VITE_WEATHER_API_KEY}`;
             try {
                 const response = await axios.get(url);
                 const data = response.data.list;
@@ -68,15 +68,15 @@ export default function Weather({ location }: Props) {
     };
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-4">Weekly Weather Forecast</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="p-6">
+            <h1 className="text-2xl font-bold mb-4">Weekly Weather Forecast</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 {weeklyForecast.map((day, index) => {
                     const date = new Date(day.dt_txt + ' UTC');
                     const pstDate = date.toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'long', month: 'long', day: 'numeric' });
 
                     return (
-                        <div key={index} className="bg-white shadow-md rounded-2xl p-4 flex flex-col items-center">
+                        <div key={index} className="bg-gradient-to-r from-blue-50 to-gray-50 shadow-md rounded-2xl p-4 flex flex-col items-center">
                             <h2 className="text-xl font-semibold mb-2">{pstDate}</h2>
                             {getWeatherIcon(day.weather[0].main)}
                             <p className="text-lg font-medium mt-2">{day.weather[0].main}</p>

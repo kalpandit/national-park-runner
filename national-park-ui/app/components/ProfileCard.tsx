@@ -38,7 +38,8 @@ function Card() {
   }, [user]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 text-center">
+    <div className="bg-white relative dark:bg-gray-800 shadow-md rounded-lg p-6 text-center">
+      <img src='logo.png' className='m-auto w-18 h-18 absolute inset-x-0 -top-10 rounded-full shadow-xl'></img>
       <h2 className="mt-4 mb-3 text-3xl font-semibold">{preferences.name}</h2>
       <p className="text-gray-600 dark:text-gray-300">
         {preferences.description }
