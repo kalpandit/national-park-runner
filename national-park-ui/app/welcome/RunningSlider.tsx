@@ -2,10 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Chatbot from "~/pages/Chatbot";
 
-
-
 const RunningSlider: React.FC = () => {
-
   const images = [
     {
       src: "yosemite.jpg",
@@ -64,62 +61,94 @@ const RunningSlider: React.FC = () => {
       color: "orange-700",
     },
   ];
-  const navigate = useNavigate(); // Initialize useNavigate
+
+  const navigate = useNavigate();
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState<{
-    src: string,
-    text: string;
-    description: string;
-    modalDescription: string;
-  } | null>(null);
   const [runnerImage, setRunnerImage] = useState("runner_static.png");
 
+  // Start Journey - Enables the animation
   const startJourney = () => {
     setIsRunning(true);
     setIsPaused(false);
     setRunnerImage("runner.gif");
   };
 
-  // Navigate to /intro when "Explore Itineraries" is clicked
+  // Navigate to /intro
   const handleExploreItineraries = () => {
-    navigate("/intro"); 
+    navigate("/intro");
   };
 
   return (
     <div className="relative w-screen h-screen overflow-hidden flex z-10">
-      {images.map((image, index) => (
-        <div key={index} className="w-screen h-screen flex-shrink-0 relative">
-          <img src={image.src} className="w-full h-full object-cover z-0" alt={`Scene ${index + 1}`} />
-          <div className="absolute top-32 left-1/2 transform -translate-x-1/2 animate-[bounce_15s_ease-in-out_infinite]">
-            <div className={`p-6 rounded-lg shadow-lg text-center bg-gray-900/75`}>
-              <h2 className="text-2xl text-white">{image.text}</h2>
-              <p className="text-md pt-3 text-white">{image.description}</p>
+      {/* Walking Path Background (Infinite Scrolling Effect) */}
+      <div
+        className={`absolute bottom-0 w-full flex`}
+        style={{
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+        }}
+      >
+        <div
+          className="flex"
+          style={{
+            width: "200%", // Twice as wide for looping effect
+            animation: isRunning ? "scrollPath 30s linear infinite" : "none",
+            animationPlayState: isPaused ? "paused" : "running",
+          }}
+        >
+          <img src="walk_path.png" className="w-full" alt="Walking Path" />
+          <img src="walk_path.png" className="w-full" alt="Walking Path Duplicate" />
+        </div>
+      </div>
 
-              {/* Button for first slide */}
-              {index === 0 && (
-                <button
-                  onClick={handleExploreItineraries}
-                  className="mt-4 px-6 py-3 bg-white text-black text-lg font-semibold rounded hover:bg-gray-300 transition"
-                >
-                  Explore Itineraries
-                </button>
-              )}
+      {/* Sliding Image Container */}
+      <div
+        className="flex relative"
+        style={{
+          width: `${images.length * 100}vw`,
+          animation: isRunning ? "running-slider 50s linear forwards" : "none",
+          animationPlayState: isPaused ? "paused" : "running",
+        }}
+      >
+        {images.map((image, index) => (
+          <div key={index} className="w-screen h-screen flex-shrink-0 relative">
+            <img src={image.src} className="w-full h-full object-cover z-0" alt={`Scene ${index + 1}`} />
 
-              {/* Button for last slide */}
-              {index === images.length - 1 && (
-                <button
-                  onClick={handleExploreItineraries}
-                  className="mt-4 px-6 py-3 bg-white text-black text-lg font-semibold rounded hover:bg-gray-300 transition"
-                >
-                  Explore Itineraries
-                </button>
-              )}
+            {/* Text & Button Panel */}
+            <div className="absolute top-32 left-1/2 transform -translate-x-1/2 animate-[bounce_15s_ease-in-out_infinite]">
+              <div className={`p-6 rounded-lg shadow-lg text-center bg-gray-900/75`}>
+                <h2 className="text-2xl text-white">{image.text}</h2>
+                <p className="text-md pt-3 text-white">{image.description}</p>
+
+                {/* Buttons for first and last slide */}
+                {(index === 0 || index === images.length - 1) && (
+                  <div className="mt-4 flex flex-col gap-3">
+                    <button
+                      onClick={startJourney}
+                      className="px-6 py-3 bg-blue-600 text-white text-lg font-semibold rounded hover:bg-blue-700 transition"
+                    >
+                      Start Journey
+                    </button>
+                    <button
+                      onClick={handleExploreItineraries}
+                      className="px-6 py-3 bg-white text-black text-lg font-semibold rounded hover:bg-gray-300 transition"
+                    >
+                      Explore Itineraries
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
+      {/* Runner Image */}
+      <div className="absolute bottom-12 left-16 z-10">
+        <img src={runnerImage} alt="Runner" className="w-32 h-32 object-contain" />
+      </div>
+
       <Chatbot />
     </div>
   );

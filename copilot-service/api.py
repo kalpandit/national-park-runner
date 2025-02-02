@@ -57,14 +57,14 @@ def generate_itinerary():
       - Difficulty
       - Time (duration in hours) -- ensure this is included
       - Accessible (true/false)
-      - Education (short learning aspect)
+      - Description (short learning aspect)
       - Rating (out of 5)
     - Include food recommendations please, even if the user doesn't say it. INCLUDE FOOD for 5 reward points; include lunch and dinner where applicable.
 
     Activity:
   accessible: boolean - must be lowercase;
   difficulty: string;
-  education: string;
+  description: string;
   name: string;
   time_of_day: string;
   rating: number;
@@ -135,14 +135,14 @@ def propose_change():
       - Education (short learning aspect) -- must be included
       - Rating (out of 5)
       - Accessible (true/false)
-      - Education (short learning aspect)
+      - Description (short learning aspect)
       - Rating (out of 5)
     - Include food recommendations if applicable.
 
     Activity:
   accessible: boolean;
   difficulty: string;
-  education: string;
+  description: string;
   name: string;
   time_of_day: string;
   rating: number;

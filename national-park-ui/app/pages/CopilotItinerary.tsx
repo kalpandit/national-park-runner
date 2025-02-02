@@ -21,8 +21,8 @@ const API_URL = "http://127.0.0.1:5000";
 type Activity = {
   accessible: boolean;
   difficulty: string;
-  education: string;
-  name: string;
+  description: string;
+  name:string;
   rating: number;
   time: number;
   type: string;
@@ -116,7 +116,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
       </div>
 
       <h3 className="text-xl font-semibold">{activity.name}</h3>
-      <p className="text-gray-600">{activity.education}</p>
+      <p className="text-gray-600">{activity.description}</p>
 
       <div className="flex items-center mt-2 text-gray-600">
         <span className="capitalize">{activity.type} {activity.difficulty && `- ${activity.difficulty}`}</span>
@@ -153,7 +153,7 @@ const SortableItem: React.FC<SortableItemProps> = ({
             {alternatives.map((alt, idx) => (
               <div key={idx} className="p-4 rounded-lg bg-gray-50">
                 <h1 className="text-lg">{alt.name}</h1>
-                <p className="text-md">{alt.education}</p>
+                <p className="text-md">{alt.description}</p>
                 <div className="flex items-center mt-2 text-gray-600">
                   <span className="capitalize">
                     {alt.type} {alt.difficulty && `- ${alt.difficulty}`}

@@ -227,6 +227,58 @@ def update_itinerary():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@app.route("/save-itinerary", methods=['POST'])
+def save_itinerary():
+    try:
+        data = request.json  # Frontend itinerary payload
+        email = data.get("email")  # Ensure user association
+        
+        if not email:
+            return jsonify({"error": "Missing email address"}), 400
+        
+        # Convert frontend itinerary format to backend format
+        itinerary_objects = []
+        for day in data["days"]:
+            for activity in day["activities"]:
+                itinerary_objects.append({
+                    "name": activity["name"],
+                    "difficulty": activity["difficulty"],
+                    "type": activity["type"],
+                    "time_of_day": activity["time_of_day"],
+                    "description": activity.get("description", ""), 
+                    "education": activity.get("education", ""), 
+                    "rating": activity.get("rating", 0),
+                    "time": activity.get("time", 0),
+                    "accessible": activity.get("accessible", False)
+                })
+
+        # Prepare MongoDB entry
+        itinerary_entry = {
+            "emailaddress": email,
+            "name": data.get("name", "Unnamed Itinerary"),
+            "description": data.get("description", ""),  # General itinerary description
+            "image_url": data.get("image", {}).get("image_url", ""),
+            "itinerary_objects": itinerary_objects,
+            "alternative_options": [],  # Placeholder for future alternatives
+            "objs_used": {},
+            "food": False  # Default food option
+        }
+
+        # Save to MongoDB
+        insert_result = ic.insert_one(itinerary_entry)
+
+        # Fetch inserted itinerary to return
+        inserted_itinerary = ic.find_one({"_id": insert_result.inserted_id})
+        serialized_result = serialize_object(inserted_itinerary)
+
+        return jsonify({
+            "message": "Itinerary saved successfully",
+            "itinerary": serialized_result
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 @app.route("/get-itinerary", methods=['GET'])
 def get_itinerary():
     try:
@@ -252,4 +304,4 @@ def get_itinerary():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=6464)
