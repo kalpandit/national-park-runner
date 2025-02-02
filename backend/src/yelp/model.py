@@ -47,6 +47,3 @@ def parse_json(response):
         })
 
     return parsed_data
-
-businesses = search_businesses("Breakfast", "Yosemite Valley, CA", max_price=2)
-print(businesses)

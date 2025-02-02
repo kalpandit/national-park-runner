@@ -132,17 +132,25 @@ def update_preferences():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@app.route("/users", methods=['POST']) # needs a "insert_one db call"
+@app.route("/users", methods=['POST'])
 def add_user():
-    data = request.json
-    emailaddress = data.get("email")
+    try: 
+        data = request.json
+        emailaddress = data.get("email")
 
-    uc.insert_one(
-        {
-            "email": emailaddress,
-        }
-    )
+        if not emailaddress:
+            return jsonify({"error": "Missing email field"}), 400
 
+        # Insert the new user
+        result = uc.insert_one({"email": emailaddress})
+
+        if result.inserted_id:
+            return jsonify({"message": "User added successfully", "user_id": str(result.inserted_id)}), 201
+        else:
+            return jsonify({"error": "User insertion failed"}), 500
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/yelp", methods=['GET'])
 def get_yelp():

@@ -1,10 +1,8 @@
 import os
-
-# from itinerary_object import itinerary_object
 from pymongo import MongoClient
-# from user import user
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
+import json
 
 
 uri = os.getenv("MONGO_URI")
@@ -31,6 +29,23 @@ class itinerary:
         self.difficulty=difficulty
         self.cost=cost
         self.emailaddress=emailaddress
+
+    def convert_to_json(self):
+        """Converts the itinerary object into a JSON-serializable dictionary."""
+        itinerary_dict = {
+            "itinerary_objects_morning": self.itinerary_objects_morning,
+            "alternative_options_morning": self.alternative_options_morning,
+            "itinerary_objects_noon": self.itinerary_objects_noon,
+            "alternative_options_noon": self.alternative_options_noon,
+            "itinerary_objects_night": self.itinerary_objects_night,
+            "alternative_options_night": self.alternative_options_night,
+            "difficulty": self.difficulty,
+            "cost": self.cost,
+            "location": self.location,
+            "emailaddress": self.emailaddress
+        }
+        
+        return json.dumps(itinerary_dict, indent=4) 
     
     def populate_itinerary(self):
         new_itinerary = []
